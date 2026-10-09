@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="css/aquarium.css" />
     <link rel="stylesheet" href="css/arcade.css" />
     <link rel="stylesheet" href="css/task-runner.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="icon" href="assets/office.svg" />
   </head>
   <body>
@@ -191,55 +192,180 @@
             <button class="btn" id="health-alert" hidden>Check observer</button>
           </div>
         </div>
-        <div id="stage">
-          <canvas
-            id="c"
-            tabindex="0"
-            aria-label="Live pixel office. Select an agent to inspect its activity. Use the Agents button for a keyboard-accessible list."
-            >Use the Agents menu for an accessible list of every session and its
-            activity.</canvas
-          >
-          <div id="empty-state" hidden>
-            <h3>The office is ready.</h3>
-            <p>Start a connected agent to bring the room to life.</p>
-            <button class="btn" id="empty-connect" data-sheet="sheet-setup">
-              Connect your first agent
-            </button>
-            <button class="btn" id="empty-show-all" hidden>
-              Show all runtimes
-            </button>
-            <p class="h" id="empty-demo">
-              Just exploring? Try <code>python3 demo_feed.py</code> in a
-              separate terminal.
-            </p>
+        <div id="stage-row">
+          <div id="stage-col">
+            <div id="stage">
+              <canvas
+                id="c"
+                tabindex="0"
+                aria-label="Live pixel office. Select an agent to inspect its activity. Use the Agents button for a keyboard-accessible list."
+                >Use the Agents menu for an accessible list of every session and
+                its activity.</canvas
+              >
+              <div id="empty-state" hidden>
+                <h3>The office is ready.</h3>
+                <p>Start a connected agent to bring the room to life.</p>
+                <button class="btn" id="empty-connect" data-sheet="sheet-setup">
+                  Connect your first agent
+                </button>
+                <button class="btn" id="empty-show-all" hidden>
+                  Show all runtimes
+                </button>
+                <p class="h" id="empty-demo">
+                  Just exploring? Try <code>python3 demo_feed.py</code> in a
+                  separate terminal.
+                </p>
+              </div>
+            </div>
+            <p id="furniture-status" class="h" role="status" hidden></p>
+            <div id="edit-hint" hidden>
+              <span id="edit-message">Choose free floor space.</span>
+              <button class="btn" id="arrange-furniture">Move</button>
+              <button class="btn" id="delete-furniture" disabled>Remove</button>
+              <button class="btn" id="undo-furniture" disabled>Undo</button>
+              <button class="btn" id="redo-furniture" disabled>Redo</button>
+              <button class="btn" id="catalog-furniture">Props</button>
+              <button class="btn" id="finish-furniture">Done</button>
+            </div>
+            <div class="scene-controls">
+              <span class="hint" id="scene-hint"
+                >Click an agent to see what’s happening.</span
+              >
+              <div class="cluster">
+                <button class="btn" id="arcade-open">Arcade</button>
+                <button class="btn" id="room-lights" aria-pressed="true">
+                  Lights on
+                </button>
+                <button class="btn" id="zoom-out" aria-label="Zoom out">
+                  −</button
+                ><button class="btn" id="zoom-fit">Fit</button
+                ><button class="btn" id="zoom-in" aria-label="Zoom in">+</button
+                ><button class="btn" id="pausebtn" aria-pressed="false">
+                  Pause motion</button
+                ><button class="btn" id="capturebtn">Snapshot ↓</button>
+              </div>
+            </div>
           </div>
+          <aside id="side-col" aria-label="Agents and environment">
+            <section
+              class="dash-panel"
+              id="panel-agents"
+              aria-labelledby="panel-agents-title"
+            >
+              <h3 id="panel-agents-title" class="dash-title">Agent Status</h3>
+              <div id="dash-agents" role="group" aria-label="Agents"></div>
+            </section>
+            <section
+              class="dash-panel"
+              id="panel-env"
+              aria-labelledby="panel-env-title"
+            >
+              <h3 id="panel-env-title" class="dash-title">
+                Active Environment
+              </h3>
+              <div class="env-body">
+                <div
+                  class="env-swatch"
+                  id="env-swatch"
+                  aria-hidden="true"
+                ></div>
+                <div>
+                  <strong id="env-name"></strong>
+                  <small>Room theme</small>
+                </div>
+              </div>
+              <button class="btn" id="env-change" type="button">
+                Change theme
+              </button>
+            </section>
+          </aside>
         </div>
-        <p id="furniture-status" class="h" role="status" hidden></p>
-        <div id="edit-hint" hidden>
-          <span id="edit-message">Choose free floor space.</span>
-          <button class="btn" id="arrange-furniture">Move</button>
-          <button class="btn" id="delete-furniture" disabled>Remove</button>
-          <button class="btn" id="undo-furniture" disabled>Undo</button>
-          <button class="btn" id="redo-furniture" disabled>Redo</button>
-          <button class="btn" id="catalog-furniture">Props</button>
-          <button class="btn" id="finish-furniture">Done</button>
-        </div>
-        <div class="scene-controls">
-          <span class="hint" id="scene-hint"
-            >Click an agent to see what’s happening.</span
+        <div id="dash-bottom">
+          <section
+            class="dash-panel"
+            id="panel-terminal"
+            aria-labelledby="panel-terminal-title"
           >
-          <div class="cluster">
-            <button class="btn" id="arcade-open">Arcade</button>
-            <button class="btn" id="room-lights" aria-pressed="true">
-              Lights on
+            <h3 id="panel-terminal-title" class="dash-title">
+              Terminal &amp; Tool Activity
+            </h3>
+            <div
+              id="dash-terminal"
+              class="terminal"
+              tabindex="0"
+              role="log"
+              aria-label="Recent observed events, read only"
+            ></div>
+          </section>
+          <section
+            class="dash-panel"
+            id="panel-board"
+            aria-labelledby="panel-board-title"
+          >
+            <h3 id="panel-board-title" class="dash-title">Task Board</h3>
+            <div
+              id="board-filters"
+              class="seg"
+              role="group"
+              aria-label="Task status"
+            ></div>
+            <div id="dash-tasks" class="dash-scroll"></div>
+            <button
+              class="btn"
+              id="board-new"
+              type="button"
+              title="Opens the Draft prompt and Local runs tools"
+            >
+              New Task
             </button>
-            <button class="btn" id="zoom-out" aria-label="Zoom out">−</button
-            ><button class="btn" id="zoom-fit">Fit</button
-            ><button class="btn" id="zoom-in" aria-label="Zoom in">+</button
-            ><button class="btn" id="pausebtn" aria-pressed="false">
-              Pause motion</button
-            ><button class="btn" id="capturebtn">Snapshot ↓</button>
-          </div>
+          </section>
+          <section
+            class="dash-panel"
+            id="panel-network"
+            aria-labelledby="panel-network-title"
+          >
+            <div class="dash-head">
+              <h3 id="panel-network-title" class="dash-title">
+                Subagent Network
+              </h3>
+              <div class="seg" role="group" aria-label="Network view">
+                <button type="button" id="network-graph" aria-pressed="true">
+                  Graph
+                </button>
+                <button type="button" id="network-list" aria-pressed="false">
+                  List
+                </button>
+              </div>
+            </div>
+            <div id="dash-network" class="dash-scroll"></div>
+          </section>
+          <section
+            class="dash-panel"
+            id="panel-logs"
+            aria-labelledby="panel-logs-title"
+          >
+            <div class="dash-head">
+              <h3 id="panel-logs-title" class="dash-title">
+                Logs &amp; Notifications
+              </h3>
+              <button class="btn small" id="logs-open" type="button">
+                Full log
+              </button>
+            </div>
+            <div id="dash-notices" class="dash-scroll"></div>
+            <div
+              id="approval-control"
+              class="approval"
+              aria-labelledby="approval-title"
+            >
+              <h4 id="approval-title">Approval Control</h4>
+              <div id="dash-approvals"></div>
+              <p class="h">
+                Requests are answered in the runtime that asked. Agent Office
+                only observes them.
+              </p>
+            </div>
+          </section>
         </div>
       </main>
       <footer>
@@ -1161,6 +1287,7 @@
     <script src="js/view-state.js"></script>
     <script src="js/tasks-view.js"></script>
     <script src="js/task-runner.js"></script>
+    <script src="js/dashboard.js"></script>
     <script src="js/office.js"></script>
     <script src="js/task-desk.js"></script>
     <script src="js/editor.js"></script>

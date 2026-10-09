@@ -262,6 +262,7 @@ function applyTheme() {
     settings.sound ? "Sound on" : "Sound off",
   );
   if (!settings.sound) audioContext?.suspend().catch(() => {});
+  window.officeDashboard?.syncTheme();
   window.officeJukebox?.sync();
   window.officeRoom?.sync();
   window.officeArcade?.sync();
@@ -1807,6 +1808,7 @@ function applyState(state, pollRevision = settingsRevision) {
     chime();
   }
   updateAttention(state, previousState);
+  window.officeDashboard?.update(state);
   const last = state.events.at(-1);
   $("latest-event").textContent = last
     ? eventText(last)
