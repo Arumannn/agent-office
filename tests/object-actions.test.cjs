@@ -28,6 +28,11 @@ test("the live observer serves nested arcade media with correct types and unchan
 });
 
 async function clickProp(page, kind) {
+  // The room spans the full canvas, so a transient notice can sit over a
+  // prop in the corner; dismiss it before aiming.
+  await page.evaluate(() =>
+    document.querySelector("#toast")?.replaceChildren(),
+  );
   const point = await page.evaluate((kind) => {
     const scene = window.officeScene;
     scene.draw(0);

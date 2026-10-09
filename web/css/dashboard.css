@@ -33,6 +33,25 @@
 #stage-col .scene-controls {
   padding: 8px 0 0;
 }
+@media (min-width: 1101px) {
+  /* Wide screens: a tighter heading and bottom row give the room more height. */
+  #stage-col .scene-controls {
+    padding-top: 6px;
+  }
+  .scene-heading {
+    margin-bottom: -4px;
+  }
+  .scene-heading h2 {
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  #workspace {
+    padding-top: 10px;
+  }
+  #workspace #dash-bottom {
+    height: clamp(190px, 25vh, 250px);
+  }
+}
 @media (min-width: 721px) {
   #stage-col .scene-controls .btn {
     min-height: 36px;

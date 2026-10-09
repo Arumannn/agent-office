@@ -382,7 +382,7 @@ class OfficeScene {
       patch: { agent_preferences: Object.fromEntries(entries) },
     };
   }
-  layout(width) {
+  layout(width, height) {
     const assigned = this.assignedSeats(),
       max = width < 600 ? 2 : this.settings.max_chars;
     const capacity = Math.max(
@@ -391,8 +391,15 @@ class OfficeScene {
     );
     const columns = Math.max(1, Math.min(max, Math.max(2, this.agents.length)));
     const rows = Math.max(1, Math.ceil(capacity / columns));
-    const w = Math.max(width < 600 ? 210 : 320, columns * 68 + 72),
-      h = Math.max(238, rows * 76 + 110);
+    let w = Math.max(width < 600 ? 210 : 320, columns * 68 + 72);
+    const h = Math.max(238, rows * 76 + 110);
+    // On a wide canvas the hall grows sideways until it fills the view at the
+    // same scale as its height. Desks stay centered; decor reflows to the width.
+    if (height && width >= 700)
+      w = Math.max(
+        w,
+        Math.min(760, Math.round(((width - 24) * (h + 8)) / (height - 24) - 5)),
+      );
     const start = (w - ((columns - 1) * 68 + 40)) / 2;
     const seats = assigned
       .filter(({ a }) => this.filter === "every" || platOf(a) === this.filter)
@@ -1119,7 +1126,7 @@ class OfficeScene {
     g.clearRect(0, 0, W, H);
     g.fillStyle = "#111720";
     g.fillRect(0, 0, W, H);
-    const room = this.layout(W);
+    const room = this.layout(W, H);
     const geometry = room.w + ":" + room.h + ":" + room.columns;
     this.relayout = !!this.geometry && this.geometry !== geometry;
     this.geometry = geometry;
