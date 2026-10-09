@@ -133,6 +133,14 @@ const STATUS_NAMES = {
   done: "Completed",
   gone: "Ended",
 };
+const STATUS_GLYPHS = {
+  working: "▶",
+  thinking: "…",
+  waiting: "!",
+  idle: "–",
+  done: "✓",
+  gone: "×",
+};
 const EVENT_NAMES = {
   usage: "Usage reported",
   tasks_update: "Task list reported",

@@ -678,20 +678,27 @@ class OfficeScene {
     const { w, h } = g,
       t = THEMES.find((x) => x.id === this.settings.theme) || THEMES[0],
       r = this.rect.bind(this),
-      dark = isNight(this.settings);
+      dark = isNight(this.settings),
+      hall = t.id === "renaissance" && this.hallFloor;
     r(4, 7, w, h, "#070a1255");
     r(0, 0, w, h, t.trim);
     r(3, 3, w - 6, h - 6, t.floor);
-    // Low-contrast staggered timber boards, instead of the old checkerboard.
-    for (let y = 28; y < h - 6; y += 7) {
-      r(4, y, w - 8, 6, Math.round(y / 7) % 2 ? t.plank : t.floor);
-      r(4, y + 6, w - 8, 1, t.seam);
-      for (let x = (Math.round(y / 7) % 2) * 18 + 4; x < w - 4; x += 36)
-        r(x, y, 1, 6, t.seam);
+    if (hall) this.hallFloor(w, h, t, dark);
+    else {
+      // Low-contrast staggered timber boards, instead of the old checkerboard.
+      for (let y = 28; y < h - 6; y += 7) {
+        r(4, y, w - 8, 6, Math.round(y / 7) % 2 ? t.plank : t.floor);
+        r(4, y + 6, w - 8, 1, t.seam);
+        for (let x = (Math.round(y / 7) % 2) * 18 + 4; x < w - 4; x += 36)
+          r(x, y, 1, 6, t.seam);
+      }
     }
-    r(3, 3, w - 6, 23, t.wall);
-    r(3, 24, w - 6, 3, t.trim);
-    r(3, 27, w - 6, 2, "#15182430");
+    if (hall) this.hallWall(w, h, t);
+    else {
+      r(3, 3, w - 6, 23, t.wall);
+      r(3, 24, w - 6, 3, t.trim);
+      r(3, 27, w - 6, 2, "#15182430");
+    }
     this.image("DOOR", 12, 5, 14, 23);
     this.image("clock", 34, 8, 10, 10);
     // A visible wall switch also works when room decorations are hidden.
@@ -705,7 +712,21 @@ class OfficeScene {
     );
     this.propHits.push({ kind: "light_switch", x: w - 19, y: 9, w: 11, h: 14 });
     const windowWidth = w < 260 ? 32 : 40;
-    for (const x of w < 260 ? [48, w - 59] : [w * 0.29, w * 0.69]) {
+    const windowXs = w < 260 ? [48, w - 59] : [w * 0.29, w * 0.69];
+    this.hallLamps = null;
+    if (hall) {
+      this.hallWindows(w, t, dark, windowWidth, windowXs);
+      if (w >= 260) {
+        this.hallBanner(Math.round(windowXs[0]) - 16, 4, 17);
+        this.hallBanner(Math.round(windowXs[1]) + windowWidth + 8, 4, 17);
+        this.hallLamps = [
+          Math.round((windowXs[0] + windowWidth + 2 + w / 2 - 21) / 2),
+          Math.round((w / 2 + 21 + windowXs[1] - 2) / 2),
+        ];
+        for (const x of this.hallLamps) this.hallLamp(x);
+      }
+    }
+    for (const x of hall ? [] : windowXs) {
       r(x, 6, windowWidth, 17, t.trim);
       r(x + 2, 7, windowWidth - 4, 14, dark ? "#243854" : "#b5d4db");
       r(x + 4, 8, 2, 10, dark ? "#67768c" : "#d8e9e6");
@@ -718,24 +739,24 @@ class OfficeScene {
         r(x + windowWidth - 17, 10, 8, 1, "#e6f0e8");
       }
     }
-    r(w / 2 - 20, 7, 40, 14, "#26313a");
-    this.text(
-      (this.settings.room_name || "AGENT OFFICE").slice(0, 18),
-      w / 2,
-      16,
-      "#e9d4a4",
-      4,
-      "center",
-    );
+    const signName = (this.settings.room_name || "AGENT OFFICE").slice(0, 18);
+    if (hall) this.hallSign(w, signName);
+    else {
+      r(w / 2 - 20, 7, 40, 14, "#26313a");
+      this.text(signName, w / 2, 16, "#e9d4a4", 4, "center");
+    }
     r(4, h - 8, w - 8, 4, t.trim);
     r(4, 28, 2, h - 36, t.trim);
     r(w - 6, 28, 2, h - 36, t.trim);
     if (this.settings.decorations) {
       // Break area remains separate from the desk rows at every viewport.
       const by = h - 46;
-      r(18, by - 10, 85, 42, t.rug);
-      r(21, by - 7, 79, 1, t.accent);
-      r(21, by + 28, 79, 1, t.accent);
+      if (hall) this.hallRug(18, by - 10, 85, 42, t);
+      else {
+        r(18, by - 10, 85, 42, t.rug);
+        r(21, by - 7, 79, 1, t.accent);
+        r(21, by + 28, 79, 1, t.accent);
+      }
       for (const p of defaultDecor(g, this.cosmetics))
         this.prop(p.kind, p.x, p.y, p.w, p.h);
       if (
@@ -758,6 +779,7 @@ class OfficeScene {
     if (dark) {
       r(3, 3, w - 6, h - 6, "#111d3a35");
     }
+    if (hall) this.hallLight(w, h, dark);
   }
   drawPets(grid) {
     const enabled =
@@ -1136,6 +1158,18 @@ class OfficeScene {
     const ox = (W - room.w * scale) / 2 + this.pan.x,
       oy = (H - room.h * scale) / 2 + this.pan.y;
     this.transform = { scale, ox, oy };
+    const hallTheme = THEMES.find((t) => t.id === this.settings.theme);
+    if (hallTheme?.id === "renaissance" && this.hallBackdrop)
+      this.hallBackdrop(
+        W,
+        H,
+        ox,
+        oy,
+        scale,
+        room,
+        hallTheme,
+        isNight(this.settings),
+      );
     g.save();
     g.translate(ox, oy);
     g.scale(scale, scale);
@@ -1149,20 +1183,30 @@ class OfficeScene {
       if (!seats.length) continue;
       const first = seats[0],
         last = seats.at(-1);
-      this.rect(
-        first.x - 7,
-        first.y - 10,
-        last.x - first.x + 54,
-        40,
-        theme.rug,
-      );
-      this.rect(
-        first.x - 5,
-        first.y + 28,
-        last.x - first.x + 50,
-        1,
-        theme.accent,
-      );
+      if (theme.id === "renaissance" && this.hallRug)
+        this.hallRug(
+          first.x - 7,
+          first.y - 10,
+          last.x - first.x + 54,
+          40,
+          theme,
+        );
+      else {
+        this.rect(
+          first.x - 7,
+          first.y - 10,
+          last.x - first.x + 54,
+          40,
+          theme.rug,
+        );
+        this.rect(
+          first.x - 5,
+          first.y + 28,
+          last.x - first.x + 50,
+          1,
+          theme.accent,
+        );
+      }
     }
     for (const s of room.seats) this.desk(s);
     for (const { a, c } of this.walking.sort((a, b) => a.c.y - b.c.y))
@@ -1196,17 +1240,25 @@ class OfficeScene {
           // Reserve the next row's approval bubble before adding a detail line.
           details = 26 * scale - 3 >= 32,
           height = details ? 32 : 18;
-        g.fillStyle = "#17212f";
+        const gilded = this.settings.theme === "renaissance";
+        g.fillStyle = gilded ? "#0d1117" : "#17212f";
         g.beginPath();
-        g.roundRect(x - width / 2, y, width, height, 5);
+        g.roundRect(x - width / 2, y, width, height, gilded ? 4 : 5);
         g.fill();
+        if (gilded) {
+          g.strokeStyle = "#c9a44a";
+          g.lineWidth = 1;
+          g.beginPath();
+          g.roundRect(x - width / 2 + 0.5, y + 0.5, width - 1, height - 1, 4);
+          g.stroke();
+        }
         g.textAlign = "center";
         g.textBaseline = "alphabetic";
         g.font = '600 13px "Geist", sans-serif';
         let name = String(s.a.label || s.a.id).replace(/[_-]+/g, " ");
         while (g.measureText(name).width > max && name.length > 2)
           name = name.slice(0, -2) + "…";
-        g.fillStyle = "#f4f6f2";
+        g.fillStyle = gilded ? "#e8dfc8" : "#f4f6f2";
         g.fillText(name, x, y + 13);
         g.font = '500 12px "Geist", sans-serif';
         g.fillStyle = STATUS_COLORS[s.a.status] || "#a7b2bd";
@@ -1216,6 +1268,9 @@ class OfficeScene {
             : s.a.tool
               ? String(s.a.tool).replaceAll("_", " ")
               : STATUS_NAMES[s.a.status] || s.a.status;
+        // Gilded labels also carry a status glyph so meaning is not color-only.
+        if (gilded && STATUS_GLYPHS[s.a.status])
+          detail = STATUS_GLYPHS[s.a.status] + " " + detail;
         while (g.measureText(detail).width > max && detail.length > 2)
           detail = detail.slice(0, -2) + "…";
         if (details) g.fillText(detail, x, y + 26);

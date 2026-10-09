@@ -175,3 +175,35 @@ test("System card shows real host figures, or stays hidden when none are reporte
     assert.equal(await page.locator("#panel-system").isHidden(), true);
   });
 });
+
+test("the Renaissance hall draws a checkered marble floor while older themes keep their boards", async () => {
+  await observerFixture({ events: [] }, async ({ page }) => {
+    await page.waitForFunction(() => initialized);
+    const sample = (theme) =>
+      page.evaluate(async (theme) => {
+        saveSettings({ theme, decorations: false, ambience: "day" });
+        await new Promise((resolve) => {
+          const wait = () =>
+            pendingSaves === 0 ? resolve() : setTimeout(wait, 20);
+          wait();
+        });
+        officeScene.draw(0);
+        const c = officeScene.canvas,
+          t = officeScene.transform,
+          ratio = c.width / c.clientWidth,
+          read = (x, y) => {
+            const px = Math.round((t.ox + x * t.scale) * ratio),
+              py = Math.round((t.oy + y * t.scale) * ratio);
+            return [...c.getContext("2d").getImageData(px, py, 1, 1).data]
+              .slice(0, 3)
+              .join(",");
+          };
+        // Two horizontally adjacent 12-pixel marble tiles, clear of desks.
+        return [read(60, 31), read(72, 31), read(2, 2)];
+      }, theme);
+    const hall = await sample("renaissance");
+    assert.notEqual(hall[0], hall[1], "adjacent marble tiles alternate");
+    const boards = await sample("amber");
+    assert.equal(boards[0], boards[1], "older themes keep continuous boards");
+  });
+});
