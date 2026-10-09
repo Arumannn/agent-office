@@ -28,6 +28,9 @@
   const BANNER = "#8e1f26";
   const BANNER_DARK = "#6a1519";
   const STONE = "#cbbf9f";
+  const WOOD_DARK = "#4a2e1a";
+  const WOOD_MID = "#6a4226";
+  const WOOD_LIGHT = "#a8743c";
 
   // Statue sprite, one character per logical pixel. Original art.
   const STATUE = [
@@ -207,6 +210,138 @@
         r(x - 1, 12, 3, 1, "#ffd27a");
         r(x, 13, 1, flicker ? 2 : 1, "#ffa23a");
       } else r(x - 1, 12, 3, 1, "#5a4a2a");
+    },
+    // ---- Furniture samples: carved wood, brass and gold, same sizes as the sprites.
+    hallDeskLegs(x, y) {
+      const r = this.rect.bind(this);
+      for (const lx of [x + 3, x + 34]) {
+        r(lx, y + 10, 3, 11, WOOD_DARK);
+        r(lx, y + 10, 1, 11, WOOD_LIGHT);
+        r(lx, y + 14, 3, 1, GOLD);
+        r(lx - 1, y + 20, 5, 1, GOLD);
+      }
+    },
+    hallDeskTop(x, y) {
+      const r = this.rect.bind(this);
+      // Writing surface with grain, then a carved apron with gilded panels.
+      r(x, y + 7, 40, 1, GOLD_LIGHT);
+      r(x, y + 8, 40, 3, WOOD_LIGHT);
+      r(x + 3, y + 9, 12, 1, shade(WOOD_LIGHT, -0.12));
+      r(x + 21, y + 10, 14, 1, shade(WOOD_LIGHT, -0.12));
+      r(x, y + 11, 40, 1, GOLD);
+      r(x, y + 12, 40, 6, WOOD_DARK);
+      for (const px of [x + 2, x + 15, x + 28]) {
+        r(px, y + 13, 10, 4, WOOD_MID);
+        r(px + 1, y + 14, 8, 2, shade(WOOD_DARK, -0.2));
+        r(px + 4, y + 14, 2, 2, GOLD);
+      }
+      r(x, y + 18, 40, 1, GOLD);
+      r(x + 1, y + 19, 38, 1, shade(WOOD_DARK, -0.3));
+    },
+    hallChair(x, y) {
+      const r = this.rect.bind(this);
+      r(x + 9, y - 3, 14, 13, WOOD_DARK);
+      r(x + 11, y - 1, 10, 9, BANNER);
+      r(x + 11, y - 1, 10, 1, "#b02a33");
+      r(x + 15, y + 2, 2, 2, GOLD);
+      r(x + 11, y - 5, 10, 3, WOOD_MID);
+      r(x + 9, y - 6, 2, 3, GOLD);
+      r(x + 21, y - 6, 2, 3, GOLD);
+      r(x + 10, y + 10, 12, 3, "#3a2314");
+      r(x + 10, y + 10, 12, 1, GOLD);
+    },
+    hallMonitorBezel(x, y) {
+      const r = this.rect.bind(this);
+      r(x + 24, y - 7, 15, 1, GOLD);
+      r(x + 24, y - 7, 1, 14, GOLD);
+      r(x + 38, y - 7, 1, 14, GOLD);
+    },
+    hallProp(kind, x, y, w, h) {
+      const r = this.rect.bind(this);
+      if (kind === "shelf") {
+        r(x, y, w, h, WOOD_DARK);
+        r(x + 2, y + 4, w - 4, h - 8, "#241509");
+        const spines = [
+          BANNER,
+          "#1f3f7a",
+          "#2f6b4a",
+          GOLD,
+          "#6b3f8a",
+          "#a8855a",
+        ];
+        for (const [row, top] of [
+          [0, y + 5],
+          [1, y + 12],
+          [2, y + 19],
+        ]) {
+          let bx = x + 3;
+          for (let i = 0; bx < x + w - 5; i++) {
+            const n = hash("book" + row + ":" + i),
+              bw = 2 + (n % 2),
+              bh = 4 + ((n >> 3) % 3);
+            r(bx, top + 6 - bh, bw, bh, spines[n % spines.length]);
+            r(bx, top + 6 - bh, 1, bh, shade(spines[n % spines.length], 0.2));
+            bx += bw + ((n >> 6) % 2);
+          }
+          r(x + 2, top + 6, w - 4, 1, WOOD_LIGHT);
+        }
+        r(x - 1, y, w + 2, 3, WOOD_MID);
+        r(x - 1, y, w + 2, 1, GOLD);
+        r(x, y + 3, 2, h - 6, WOOD_MID);
+        r(x + w - 2, y + 3, 2, h - 6, WOOD_MID);
+        r(x - 1, y + h - 3, w + 2, 3, "#2c1b0e");
+        r(x - 1, y + h - 3, w + 2, 1, GOLD);
+        return true;
+      }
+      if (kind === "roundtable") {
+        const top = [
+          [6, 16],
+          [3, 22],
+          [1, 26],
+          [0, 28],
+          [0, 28],
+          [1, 26],
+          [3, 22],
+          [6, 16],
+        ];
+        top.forEach(([dx, dw], i) => r(x + dx, y + 1 + i, dw, 1, GOLD));
+        top.forEach(([dx, dw], i) => {
+          if (i > 0 && i < top.length - 1)
+            r(x + dx + 1, y + 1 + i, dw - 2, 1, WOOD_MID);
+        });
+        // A parchment map lies in the middle of the table.
+        r(x + 8, y + 3, 12, 4, "#e6d3a3");
+        r(x + 9, y + 4, 4, 1, "#9a7b4a");
+        r(x + 14, y + 5, 4, 1, "#3f6a8a");
+        r(x + 12, y + 9, 4, 9, WOOD_DARK);
+        r(x + 12, y + 12, 4, 1, GOLD);
+        r(x + 7, y + 18, 14, 2, WOOD_MID);
+        r(x + 5, y + 20, 18, 2, WOOD_DARK);
+        r(x + 5, y + 20, 18, 1, GOLD);
+        return true;
+      }
+      if (kind === "lamp") {
+        const lit = this.settings.room_lights !== false,
+          flicker = Math.floor(this.time * 7 + x) % 2;
+        r(x + 5, y + 8, 2, 18, "#a8863c");
+        r(x + 5, y + 8, 1, 18, GOLD_LIGHT);
+        r(x + 3, y + 15, 6, 1, GOLD);
+        r(x + 2, y + 25, 8, 2, "#8a6a2a");
+        r(x + 1, y + 27, 10, 3, "#6b4f1c");
+        r(x + 1, y + 27, 10, 1, GOLD_LIGHT);
+        // Three arms, each ending in a candle.
+        r(x + 1, y + 9, 10, 1, GOLD);
+        for (const cx of [x + 1, x + 5, x + 10]) {
+          r(cx, y + 5, 2, 5, "#efe3c4");
+          r(cx, y + 5, 2, 1, "#d9c9a0");
+          if (lit) {
+            r(cx, y + 3, 2, 2, "#ffd27a");
+            if (flicker) r(cx, y + 2, 1, 1, "#ffa23a");
+          } else r(cx, y + 4, 2, 1, "#3a2f20");
+        }
+        return true;
+      }
+      return false;
     },
     hallRug(x, y, w, h, t) {
       const r = this.rect.bind(this);

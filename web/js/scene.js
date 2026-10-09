@@ -515,13 +515,17 @@ class OfficeScene {
         plant && reaction !== null
           ? Math.round(Math.sin(reaction * 5) * (1 - reaction / 4))
           : 0;
-    this.image(
-      kind === "taskterminal" ? this.taskTerminalSpriteKey() : kind,
-      x + sway,
-      y,
-      w,
-      h,
-    );
+    if (!(
+      this.settings.theme === "renaissance" &&
+      this.hallProp?.(kind, x + sway, y, w, h)
+    ))
+      this.image(
+        kind === "taskterminal" ? this.taskTerminalSpriteKey() : kind,
+        x + sway,
+        y,
+        w,
+        h,
+      );
     if (Object.hasOwn(PROP_HINTS, kind))
       this.propHits.push({ kind, x, y, w, h });
     const r = this.rect.bind(this),
@@ -895,15 +899,22 @@ class OfficeScene {
       r(x - 3, y - 12, 46, 2, t.trim);
       r(x - 4, y - 12, 2, 36, t.trim);
     }
+    const hall = t.id === "renaissance" && this.hallDeskTop;
     this.shadow(x, y + 21, 42);
     const deskStyle = this.settings.desk_style || DEFAULT_SETTINGS.desk_style;
     const deskLeg = deskStyle === "slate" ? "#525e65" : "#453b3b";
-    r(x + 3, y + 10, 3, 11, deskLeg);
-    r(x + 34, y + 10, 3, 11, deskLeg);
+    if (hall) this.hallDeskLegs(x, y);
+    else {
+      r(x + 3, y + 10, 3, 11, deskLeg);
+      r(x + 34, y + 10, 3, 11, deskLeg);
+    }
     // Chair and backrest precede the character; desktop occludes the legs.
-    r(x + 9, y - 3, 14, 13, "#303a43");
-    r(x + 11, y - 5, 10, 3, "#596570");
-    r(x + 10, y + 10, 12, 3, "#26313a");
+    if (hall) this.hallChair(x, y);
+    else {
+      r(x + 9, y - 3, 14, 13, "#303a43");
+      r(x + 11, y - 5, 10, 3, "#596570");
+      r(x + 10, y + 10, 12, 3, "#26313a");
+    }
     const target = { x: x + 8, y: y - 17 };
     let c = this.chars.get(a.id);
     if (!c) {
@@ -990,7 +1001,8 @@ class OfficeScene {
     // advance the four-frame walk cycle by distance travelled.
     if (!c.moving) this.character(a, c.x, c.y, c);
     const desktop = this.sprites["desk-" + deskStyle];
-    if (desktop) g.drawImage(desktop, x, y + 7, 40, 14);
+    if (hall) this.hallDeskTop(x, y);
+    else if (desktop) g.drawImage(desktop, x, y + 7, 40, 14);
     else {
       r(x, y + 7, 40, 2, "#d6b17b");
       r(x, y + 9, 40, 8, "#b18b63");
@@ -1014,6 +1026,7 @@ class OfficeScene {
       1,
       "#6c9d94",
     );
+    if (hall) this.hallMonitorBezel(x, y);
     if (this.cosmetics.includes("gold_monitor"))
       r(x + 25, y - 6, 13, 1, "#d8b56d");
     if (this.cosmetics.includes("mug")) {
