@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { observerFixture } = require("./observer-fixture.cjs");
+const { openNav } = require("./nav.cjs");
 
 const screenshots =
   process.env.OFFICE_DASHBOARD_SCREENSHOTS ||
@@ -39,6 +40,7 @@ test("a maximum-length office name keeps live status controls inside the viewpor
     async ({ page }) => {
       const name = "BuildReview".repeat(4) + "Room";
       assert.equal(name.length, 48);
+      await openNav(page);
       await page.click("#settingsbtn");
       await page.fill("#room-name-input", name);
       await page.click("#room-name-save");
@@ -101,6 +103,7 @@ test("reverse tabbing keeps settings controls below the sticky panel header", as
       { width: 1440, height: 900 },
     ]) {
       await page.setViewportSize(viewport);
+      await openNav(page);
       await page.click("#settingsbtn");
       await page.locator("#sheet-settings .close").focus();
       await page.keyboard.press("Shift+Tab");

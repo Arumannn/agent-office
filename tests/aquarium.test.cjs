@@ -7,6 +7,7 @@ const path = require("node:path");
 const os = require("node:os");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const {
   AquariumHabitat,
   WIDTH,
@@ -687,6 +688,7 @@ test("aquarium room and canvas actions wait for saved settings before exposing e
   let posts = 0;
   return withPage(
     async (p) => {
+      await openNav(p);
       await p.click("#settingsbtn");
       await p.locator('[data-activity="Aquarium"]').click();
       assert.equal(await p.inputValue("#aquarium-name-input"), "Saved Lagoon");
@@ -709,6 +711,7 @@ test("aquarium room and canvas actions wait for saved settings before exposing e
           )
             posts++;
         });
+        await openNav(p);
         await p.click("#settingsbtn");
         await p.locator('[data-activity="Aquarium"]').click();
         assert.equal(

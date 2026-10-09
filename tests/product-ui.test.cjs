@@ -6,6 +6,7 @@ const path = require("node:path");
 const os = require("node:os");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const baseURL = "http://127.0.0.1:18118";
 const root = path.resolve(__dirname, "..");
 const screenshots =
@@ -118,12 +119,14 @@ async function capture(p, name) {
 }
 test("office and agent names persist, while typing survives live polling", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.fill("#room-name-input", "North Office");
     await p.click("#room-name-save");
     await p.waitForFunction(() => pendingSaves === 0);
     assert.equal(await p.textContent("#room-name"), "North Office");
     await p.keyboard.press("Escape");
+    await openNav(p);
     await p.click("#floorbtn");
     await p.click('#roster [data-agent="a"]');
     await p.fill("#agent-name-input", "Coder One");
@@ -137,6 +140,7 @@ test("office and agent names persist, while typing survives live polling", () =>
     await p.reload();
     await p.waitForFunction(() => initialized);
     assert.equal(await p.textContent("#room-name"), "North Office");
+    await openNav(p);
     await p.click("#floorbtn");
     assert.match(await p.textContent('#roster [data-agent="a"]'), /Coder One/);
     await p.click('#roster [data-agent="a"]');
@@ -154,6 +158,7 @@ test("office and agent names persist, while typing survives live polling", () =>
   }));
 test("usage shows exact known metrics, partial coverage, model sources, and unknown sessions", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#floorbtn");
     const cards = p.locator("#usagebox .usage-card");
     assert.equal(await cards.nth(0).locator("strong").textContent(), "100");
@@ -200,6 +205,7 @@ test("Hermes transport sessions show canonical runtime usage in the inspector", 
     await p.waitForFunction(() =>
       agents.some((a) => a.id === "transport-session"),
     );
+    await openNav(p);
     await p.click("#floorbtn");
     await p.click('#roster [data-agent="transport-session"]');
     assert.equal(
@@ -221,6 +227,7 @@ test("Hermes transport sessions show canonical runtime usage in the inspector", 
   }));
 test("Codex setup explains hook trust and the optional captured-stream import", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.click('#sheet-settings [data-sheet="sheet-setup"]');
     await p.selectOption("#setup-runtime", "codex");
@@ -251,6 +258,7 @@ test("Codex setup explains hook trust and the optional captured-stream import", 
   }));
 test("saved history searches beyond the live window and retains rows after a refresh failure", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#eventsbtn");
     await p.fill("#eventSearch", "older-file-0.js");
     assert.equal(await p.locator("#eventbox .event").count(), 0);
@@ -284,6 +292,7 @@ test("saved history searches beyond the live window and retains rows after a ref
   }));
 test("retention, pet names and a reported-cost budget survive reload", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.click(
       '#history-settings [data-setting="history_limit"][data-value="250"]',
@@ -302,6 +311,7 @@ test("retention, pet names and a reported-cost budget survive reload", () =>
     await p.waitForFunction(() => pendingSaves === 0);
     await p.reload();
     await p.waitForFunction(() => initialized);
+    await openNav(p);
     await p.click("#settingsbtn");
     assert.equal(
       await p.getAttribute(
@@ -316,6 +326,7 @@ test("retention, pet names and a reported-cost budget survive reload", () =>
     await p.locator("#history-settings").scrollIntoViewIfNeeded();
     await capture(p, "retention-and-usage-alert");
     await p.keyboard.press("Escape");
+    await openNav(p);
     await p.click("#floorbtn");
     assert.equal(await p.isVisible("#budget-warning"), true);
     assert.match(await p.textContent("#budget-warning"), /partial coverage/);
@@ -362,6 +373,7 @@ test("mobile name forms, history tools and usage stay within the dialog", () =>
   withPage(
     async (p) => {
       for (const id of ["floorbtn", "settingsbtn", "eventsbtn"]) {
+        await openNav(p);
         await p.click("#" + id);
         assert.equal(
           await p.evaluate(
@@ -385,6 +397,7 @@ test("mobile name forms, history tools and usage stay within the dialog", () =>
 test("clearing saved history preserves XP, reported usage and old unanswered requests", () =>
   withPage(async (p) => {
     const beforeState = await (await p.request.get(baseURL + "/state")).json();
+    await openNav(p);
     await p.click("#settingsbtn");
     p.once("dialog", (dialog) => dialog.accept());
     await p.click("#clear-history");

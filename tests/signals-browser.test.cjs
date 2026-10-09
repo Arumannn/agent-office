@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { observerFixture } = require("./observer-fixture.cjs");
+const { openNav } = require("./nav.cjs");
 const reports = path.resolve(__dirname, "../reports/signals");
 const sizes = {
   taskterminal: [24, 34],
@@ -128,6 +129,7 @@ async function freePoint(page, target, minDistance = 0) {
 }
 async function place(page, kind) {
   await closePanel(page);
+  await openNav(page);
   await page.click("#settingsbtn");
   const before = await page.evaluate(() => settings.furniture.length);
   await page.locator(`#furniture-tools [data-kind="${kind}"]`).click();
@@ -494,6 +496,7 @@ test("task console uses real local-run states, gates routing, and keeps the obse
       '#room-actions [data-activity="Open task terminal"]',
     );
     assert.equal(await roomButton.isDisabled(), false);
+    await openNav(page);
     await page.click("#settingsbtn");
     await roomButton.scrollIntoViewIfNeeded();
     await roomButton.click();
@@ -787,6 +790,7 @@ async function advanceRenderedPetToBed(page) {
   });
 }
 async function selectBedForEdit(page) {
+  await openNav(page);
   await page.click("#settingsbtn");
   await page.click("#edit-furniture");
   const point = await propPoint(page, "petbed");

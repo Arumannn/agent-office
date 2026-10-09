@@ -7,6 +7,7 @@ const fs = require("node:fs"),
   os = require("node:os");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, ".."),
   baseURL = "http://127.0.0.1:18123";
 const reports =
@@ -250,6 +251,7 @@ async function closeAll(p) {
 test("deep mobile panels keep their header and close control visible and preserve reading position", () =>
   withPage(
     async (p) => {
+      await openNav(p);
       await p.click("#settingsbtn");
       await p.locator("#history-settings").scrollIntoViewIfNeeded();
       const before = await p
@@ -265,6 +267,7 @@ test("deep mobile panels keep their header and close control visible and preserv
       assert.ok(heading.y >= 8, "panel identity stays visible");
       await capture(p, "mobile-deep-customize");
       await closeAll(p);
+      await openNav(p);
       await p.click("#settingsbtn");
       assert.ok(
         Math.abs(
@@ -283,6 +286,7 @@ test("deep mobile panels keep their header and close control visible and preserv
 
 test("inspector Back and Escape return to the searched roster and its focused card", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#floorbtn");
     await p.fill("#trackSearch", "Workspace");
     const card = p.locator("#roster .agent-card").last();
@@ -321,6 +325,7 @@ test("inspector Back and Escape return to the searched roster and its focused ca
 
 test("selected saved-event text survives unchanged polling and a newer inserted event", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#eventsbtn");
     await p.click('[data-event-view="history"]');
     await p.waitForFunction(() => historyLoaded && !historyLoading);
@@ -389,6 +394,7 @@ test("identical save failures make one dismissible notice outside camera control
   withPage(
     async (p) => {
       const before = await ledger(p);
+      await openNav(p);
       await p.click("#settingsbtn");
       await p.route("**/settings", (r) =>
         r.request().method() === "POST"
@@ -449,6 +455,7 @@ test("safe local views restore zoom, runtime, pause, panel filters and scroll wi
     await p.click("#zoom-in");
     await p.click("#pausebtn");
     await p.selectOption("#filterbtn", "opencode");
+    await openNav(p);
     await p.click("#floorbtn");
     await p.fill("#trackSearch", "Workspace");
     await p.locator("#roster .agent-card").last().scrollIntoViewIfNeeded();
@@ -476,6 +483,7 @@ test("safe local views restore zoom, runtime, pause, panel filters and scroll wi
     assert.equal(await p.evaluate(() => officeScene.edit), null);
     assert.deepEqual(await p.evaluate(() => officeScene.pan), { x: 0, y: 0 });
     await closeAll(p);
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.reload();
     await p.waitForFunction(() => initialized);
@@ -523,6 +531,7 @@ test("unavailable browser storage leaves view controls usable", () =>
     async (p) => {
       await p.click("#zoom-in");
       assert.equal(await p.evaluate(() => officeScene.zoom), 1.25);
+      await openNav(p);
       await p.click("#floorbtn");
       assert.equal(await p.isVisible("#sheet-floor"), true);
       await closeAll(p);
@@ -573,6 +582,7 @@ test("static preview and observer view preferences use separate namespaces", () 
 test("agent summaries show reported totals and provenance without double-counting token subsets", () =>
   withPage(async (p) => {
     const before = await ledger(p);
+    await openNav(p);
     await p.click("#floorbtn");
     const full = p.locator('#roster [data-agent="hud-0"] .agent-usage');
     assert.match(await full.textContent(), /150/);
@@ -612,6 +622,7 @@ test("all HUD panels and notice controls fit at 320 pixels", () =>
         "settingsbtn",
         "helpbtn",
       ]) {
+        await openNav(p);
         await p.click("#" + id);
         const panel = p.locator(".sheet:not([hidden])");
         assert.equal(
@@ -638,6 +649,7 @@ test("all HUD panels and notice controls fit at 320 pixels", () =>
 test("inspector desk and appearance choices persist, render, and restore defaults without accounting changes", () =>
   withPage(async (p) => {
     const before = await ledger(p);
+    await openNav(p);
     await p.click("#floorbtn");
     await p.locator('#roster [data-agent="hud-0"]').click();
     assert.equal(
@@ -694,6 +706,7 @@ test("inspector desk and appearance choices persist, render, and restore default
     await closeAll(p);
     await p.reload();
     await p.waitForFunction(() => initialized);
+    await openNav(p);
     await p.click("#floorbtn");
     await p.locator('#roster [data-agent="hud-0"]').click();
     assert.equal(await p.inputValue("#agent-seat-select"), free);
@@ -719,6 +732,7 @@ test("failed preference writes retain drafts and hidden occupied desks stay unav
   withPage(async (p) => {
     const before = await ledger(p);
     await p.selectOption("#filterbtn", "claude");
+    await openNav(p);
     await p.click("#floorbtn");
     await p.locator('#roster [data-agent="hud-0"]').click();
     const occupied = await p.evaluate(
@@ -780,6 +794,7 @@ test("inactive preference cleanup frees a bounded map and preserves active filte
     await p.waitForFunction(() => initialized);
     const before = await ledger(p);
     await p.selectOption("#filterbtn", "claude");
+    await openNav(p);
     await p.click("#settingsbtn");
     assert.match(
       await p.textContent("#agent-preferences-count"),
@@ -797,6 +812,7 @@ test("inactive preference cleanup frees a bounded map and preserves active filte
     );
     assert.match(await p.textContent("#agent-preferences-reset-status"), /126/);
     await closeAll(p);
+    await openNav(p);
     await p.click("#floorbtn");
     await p.locator('#roster [data-agent="hud-2"]').click();
     await p.selectOption("#agent-appearance-select", "char3");
@@ -812,6 +828,7 @@ test("inactive preference cleanup frees a bounded map and preserves active filte
 test("pet visibility and movement controls persist and gate keyboard visits without accounting writes", () =>
   withPage(async (p) => {
     const before = await ledger(p);
+    await openNav(p);
     await p.click("#settingsbtn");
     await p
       .getByRole("group", { name: "Pets", exact: true })
@@ -828,6 +845,7 @@ test("pet visibility and movement controls persist and gate keyboard visits with
     await p.waitForFunction(() => pendingSaves === 0);
     await p.reload();
     await p.waitForFunction(() => initialized);
+    await openNav(p);
     await p.click("#settingsbtn");
     assert.equal(
       await p
@@ -865,6 +883,7 @@ test("pet visibility and movement controls persist and gate keyboard visits with
 
 test("delayed saved history restores its reading position after reload", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#eventsbtn");
     await p.click('[data-event-view="history"]');
     await p.waitForFunction(() => historyLoaded && !historyLoading);
@@ -898,6 +917,7 @@ test("delayed saved history restores its reading position after reload", () =>
 
 test("exact runtime usage wins over a Hermes alias bucket for the same session", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#floorbtn");
     const usage = p.locator('#roster [data-agent="hud-alias"] .agent-usage');
     assert.match(await usage.textContent(), /25 tokens/);
@@ -909,6 +929,7 @@ test("exact runtime usage wins over a Hermes alias bucket for the same session",
 
 test("bounded notification eviction preserves keyboard focus inside the active panel", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.evaluate(() => {
       toast("First notice");
@@ -943,6 +964,7 @@ test("a drafted free desk survives another session leaving and an empty desk can
     });
     await p.reload();
     await p.waitForFunction(() => initialized);
+    await openNav(p);
     await p.click("#floorbtn");
     await p.locator('#roster [data-agent="hud-0"]').click();
     await p.selectOption("#agent-seat-select", "31");
@@ -982,6 +1004,7 @@ test("resetting preferences does not overwrite edits made while its save is pend
     });
     await p.reload();
     await p.waitForFunction(() => initialized);
+    await openNav(p);
     await p.click("#floorbtn");
     await p.locator('#roster [data-agent="hud-0"]').click();
     await p.route("**/settings", async (route) => {
@@ -1020,6 +1043,7 @@ test("inactive-choice summary follows departing sessions while Customize stays o
     });
     await p.reload();
     await p.waitForFunction(() => initialized);
+    await openNav(p);
     await p.click("#settingsbtn");
     assert.equal(
       await p.locator("#clear-inactive-preferences").isDisabled(),
@@ -1047,6 +1071,7 @@ test("initial loading blocks furniture actions and imports without replacing sav
         (await (await p.request.get(baseURL + "/settings")).json()).furniture,
         saved,
       );
+      await openNav(p);
       await p.click("#settingsbtn");
       assert.equal(await p.locator('[data-kind="stool"]').isDisabled(), false);
       await p.locator('[data-kind="stool"]').click();
@@ -1091,6 +1116,7 @@ test("initial loading blocks furniture actions and imports without replacing sav
             posts++;
         });
         p.on("download", () => downloads++);
+        await openNav(p);
         await p.click("#settingsbtn");
         for (const id of [
           '[data-kind="arcade"]',
@@ -1171,6 +1197,7 @@ test("pre-ready pet-name save preserves both stored names and its retry keeps th
           )
             posts++;
         });
+        await openNav(p);
         await p.click("#settingsbtn");
         assert.equal(await p.locator("#pet-cat1-name").isDisabled(), true);
         assert.equal(
@@ -1219,6 +1246,7 @@ test("first hydration fills a focused untouched pet-name field before a full-map
         pet_names: { cat1: "Saved orange", cat2: "Saved black" },
       },
       beforeReady: async (p) => {
+        await openNav(p);
         await p.click("#settingsbtn");
         assert.equal(await p.locator("#pet-cat2-name").isDisabled(), true);
         await p.locator("#pet-cat2-name").focus();
@@ -1253,6 +1281,7 @@ test("failed initial state keeps editing blocked until a successful retry", () =
         await p.waitForFunction(() =>
           document.body.classList.contains("offline"),
         );
+        await openNav(p);
         await p.click("#settingsbtn");
         assert.equal(await p.evaluate(() => settingsReady), false);
         assert.equal(await p.locator("#pet-cat1-name").isDisabled(), true);
@@ -1263,8 +1292,10 @@ test("failed initial state keeps editing blocked until a successful retry", () =
         );
         await closeAll(p);
         assert.equal(await p.evaluate(() => opened), null);
+        await openNav(p);
         await p.click("#helpbtn");
         await closeAll(p);
+        await openNav(p);
         await p.click("#settingsbtn");
       },
     },
@@ -1304,8 +1335,11 @@ for (const viewport of [
           before,
           "visible notices never move or rescale the canvas",
         );
+        await openNav(p);
         await p.click("#settingsbtn");
         await closeAll(p);
+        // Choosing from the narrow menu may scroll the page; compare from the top.
+        await p.evaluate(() => scrollTo(0, 0));
         await p.waitForTimeout(250);
         assert.deepEqual(
           await geometry(),

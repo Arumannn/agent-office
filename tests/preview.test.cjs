@@ -7,6 +7,7 @@ const os = require("node:os");
 const http = require("node:http");
 const { spawnSync } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, "..");
 const baseURL = "http://127.0.0.1:18120";
 const screenshots =
@@ -153,6 +154,7 @@ test("insecure HTTP preview saves preferences and still rejects a stale revision
       const oldTag = await page.evaluate(async () =>
         (await fetch("/settings")).headers.get("etag"),
       );
+      await openNav(page);
       await page.click("#settingsbtn");
       await page.fill("#room-name-input", "HTTP preview office");
       await page.click("#room-name-save");
@@ -395,6 +397,7 @@ test("static preview has fresh synthetic state, honest usage, and no local obser
     assert.equal(snapshot.usage.totals.input_tokens, 22000);
     assert.equal(snapshot.usage.totals.cost_usd, 0.0184);
     await capture(p, "desktop-demo");
+    await openNav(p);
     await p.click("#floorbtn");
     assert.match(
       await p.textContent(".preview-usage-note"),
@@ -428,11 +431,13 @@ test("static preview has fresh synthetic state, honest usage, and no local obser
 test("demo preferences persist separately and update the same UI", () =>
   withPage(async (p) => {
     await p.evaluate(() => localStorage.setItem("unrelated-sentinel", "keep"));
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.fill("#room-name-input", "My sample studio");
     await p.click("#room-name-save");
     await p.waitForFunction(() => pendingSaves === 0);
     await p.keyboard.press("Escape");
+    await openNav(p);
     await p.click("#themeNextbtn");
     await p.waitForFunction(() => pendingSaves === 0);
     await p.reload();
@@ -458,6 +463,7 @@ test("demo preferences persist separately and update the same UI", () =>
 test("clear history, reset, and restore remain coherent demo-only actions", () =>
   withPage(async (p) => {
     const original = await p.evaluate(() => window._state);
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.fill("#room-name-input", "Keep this room name");
     await p.click("#room-name-save");
@@ -538,6 +544,7 @@ for (const [label, options] of [
 ])
   test(label + " still permits coherent in-visit demo reset and restore", () =>
     withPage(async (p) => {
+      await openNav(p);
       await p.click("#settingsbtn");
       await p.fill("#room-name-input", "This visit only");
       await p.click("#room-name-save");
@@ -613,6 +620,7 @@ test("two preview tabs keep conditional preferences and preserve reset/history c
     assert.equal((await stored()).reset, false);
     assert.equal((await stored()).historyCleared, false);
     assert.equal((await stored()).settings.music_volume, 0.25);
+    await openNav(other);
     await other.click("#settingsbtn");
     await other.fill("#room-name-input", "Unsaved local draft");
     await other.press("#room-name-input", "Tab");
@@ -728,6 +736,7 @@ test("static settings expose revisions and reject missing or stale write conditi
 
 test("malformed stored demo preferences stay intact and block edits until repaired", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.fill("#room-name-input", "Preserved demo preferences");
     await p.click("#room-name-save");
@@ -801,6 +810,7 @@ test("malformed stored demo preferences stay intact and block edits until repair
       }, original);
       await p.waitForFunction(() => settingsReady);
     }
+    await openNav(p);
     await p.click("#settingsbtn");
     assert.equal(
       await p.inputValue("#room-name-input"),

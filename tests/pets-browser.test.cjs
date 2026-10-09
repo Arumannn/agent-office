@@ -7,6 +7,7 @@ const path = require("node:path");
 const os = require("node:os");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, ".."),
   base = "http://127.0.0.1:18124",
   reports = path.join(root, "reports/pets");
@@ -210,6 +211,7 @@ async function accounting(p) {
   };
 }
 async function option(p, group, name) {
+  await openNav(p);
   await p.click("#settingsbtn");
   await p
     .getByRole("group", { name: group, exact: true })
@@ -284,6 +286,7 @@ test("cats move on the real floor, retain collision clearance and use their draw
     // lookup so this pointer test does not chase a moving pixel-sized target.
     await p.click("#pausebtn");
     await p.waitForFunction(() => officeScene.paused);
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.fill("#pet-cat1-name", "Maple");
     await p.fill("#pet-cat2-name", "Mochi");

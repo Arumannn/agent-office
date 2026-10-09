@@ -7,6 +7,7 @@ const fs = require("node:fs"),
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
 const { postSettings } = require("./settings-helper.cjs");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, ".."),
   base = "http://127.0.0.1:18221";
 let home, settingsFile, server, browser;
@@ -116,6 +117,7 @@ async function accounting(p) {
   };
 }
 async function inspector(p, id) {
+  await openNav(p);
   await p.click("#floorbtn");
   await p.locator(`#roster [data-agent="${id}"]`).click();
 }
@@ -177,10 +179,12 @@ test("a stale appearance save keeps another agent's preference and retains the s
 
 test("a stale pet-name save restores its untouched sibling field before a native retry", () =>
   withViews(async (a, b) => {
+    await openNav(a);
     await a.click("#settingsbtn");
     await a.fill("#pet-cat1-name", "Orange from A");
     await a.locator("#pet-name-form button").click();
     await settled(a);
+    await openNav(b);
     await b.click("#settingsbtn");
     await b.fill("#pet-cat2-name", "Black from B");
     await b.locator("#pet-name-form button").click();
@@ -216,8 +220,10 @@ test("a conflicted furniture import leaves the current room intact until a revie
       await request;
       await p.waitForFunction(() => !furnitureSaving && pendingSaves === 0);
     };
+    await openNav(a);
     await a.click("#settingsbtn");
     await upload(a, [stool]);
+    await openNav(b);
     await b.click("#settingsbtn");
     await upload(b, [plant]);
     assert.deepEqual((await stored(a)).furniture, [stool]);
@@ -247,6 +253,7 @@ test("a conflict invalidates all older queued map writes instead of rebasing the
       await route.continue();
     });
     try {
+      await openNav(b);
       await b.click("#settingsbtn");
       await b.fill("#pet-cat2-name", "First B draft");
       await b.locator("#pet-name-form button").click();
@@ -254,6 +261,7 @@ test("a conflict invalidates all older queued map writes instead of rebasing the
       await b.fill("#pet-cat2-name", "Newer B draft");
       await b.locator("#pet-name-form button").click();
       await b.waitForFunction(() => pendingSaves === 2);
+      await openNav(a);
       await a.click("#settingsbtn");
       await a.fill("#pet-cat1-name", "A kept");
       await a.locator("#pet-name-form button").click();
@@ -290,6 +298,7 @@ test("a settings read failure keeps observations visible but blocks later edits 
       assert.equal(await a.evaluate(() => settingsReady), false);
       assert.equal(await a.textContent("#connection"), "Connected");
       assert.equal(await a.textContent("#agent-total"), "2");
+      await openNav(a);
       await a.click("#settingsbtn");
       assert.equal(await a.isDisabled("#room-name-input"), true);
       assert.match(
@@ -326,6 +335,7 @@ test("the first unavailable settings response still renders observed agents safe
       assert.equal(await a.evaluate(() => settingsReady), false);
       assert.equal(await a.textContent("#agent-total"), "2");
       assert.equal(await a.textContent("#connection"), "Connected");
+      await openNav(a);
       await a.click("#settingsbtn");
       assert.equal(await a.isDisabled("#room-name-input"), true);
       assert.match(
@@ -442,6 +452,7 @@ test("storage diagnostics distinguish cleanup, processing, unknown measurements 
 test("the Tasks panel distinguishes unavailable coverage from a reported empty collection", () =>
   withViews(async (a) => {
     await a.route("**/state", (route) => route.abort());
+    await openNav(a);
     await a.click("#tasksbtn");
     await a.click('[data-task-view="reported"]');
     for (const coverage of ["missing", "null", "empty"]) {
@@ -500,6 +511,7 @@ test("reported task snapshots appear in the existing Tasks panel and retain sour
     await a.waitForFunction(() =>
       window._state?.tasks?.some((board) => board.session_id === "workflow"),
     );
+    await openNav(a);
     await a.click("#tasksbtn");
     await a.click('[data-task-view="reported"]');
     assert.equal(await a.isVisible("#taskboard"), false);

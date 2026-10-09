@@ -7,6 +7,7 @@ const path = require("node:path");
 const os = require("node:os");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, "..");
 const baseURL = "http://127.0.0.1:18121";
 const screenshots =
@@ -188,6 +189,7 @@ async function closePanels(p) {
 }
 async function roomAction(p, name) {
   await closePanels(p);
+  await openNav(p);
   await p.click("#settingsbtn");
   const button = p
     .locator("#room-actions")
@@ -225,6 +227,7 @@ async function clickProp(p, kind) {
 async function place(p, kind) {
   await closePanels(p);
   const before = await p.evaluate(() => settings.furniture.length);
+  await openNav(p);
   await p.click("#settingsbtn");
   await p.click(`#furniture-tools [data-kind="${kind}"]`);
   const point = await p.evaluate(() => {
@@ -486,6 +489,7 @@ test("header mute, page visibility and pagehide release actual audio contexts", 
     await p.click("#jukebox-play");
     await p.waitForFunction(() => __measureMusic().rms > 0.0001);
     await closePanels(p);
+    await openNav(p);
     await p.click("#sound");
     await p.waitForFunction(
       () =>
@@ -547,6 +551,7 @@ test("canvas props open usage, tasks, history and the jukebox", () =>
   }));
 test("four reward props unlock from recorded sessions, tools and subagent work", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     for (const kind of ["arcade", "recordplayer", "robot", "terrarium"])
       assert.equal(await p.isDisabled(`[data-kind="${kind}"]`), true);
@@ -669,6 +674,7 @@ test("named cats, feeding and music leave recorded work and usage unchanged", ()
       ]).flat(),
     );
     await p.waitForFunction(() => officeScene.cosmetics.includes("gitcat"));
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.fill("#pet-cat1-name", "Maple");
     await p.fill("#pet-cat2-name", "Mochi");
@@ -771,6 +777,7 @@ test("jukebox and room action controls fit on a 320 pixel screen", () =>
       );
       await screenshot(p, "mobile-jukebox");
       await closePanels(p);
+      await openNav(p);
       await p.click("#settingsbtn");
       await p.locator("#room-actions").scrollIntoViewIfNeeded();
       assert.equal(

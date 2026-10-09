@@ -7,6 +7,7 @@ const path = require("node:path");
 const os = require("node:os");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, "..");
 const baseURL = "http://127.0.0.1:18122";
 const reports =
@@ -265,6 +266,7 @@ async function ledger(p) {
 async function customize(p) {
   if (await p.evaluate(() => opened === "sheet-settings")) return;
   if (await p.evaluate(() => !!opened)) await p.keyboard.press("Escape");
+  await openNav(p);
   await p.click("#settingsbtn");
 }
 async function choose(p, group, name) {
@@ -502,6 +504,7 @@ test("keyboard appearance controls change rendered desks and persist without cre
 
 test("agent cards use the chosen delegated appearance and keep parent portraits as people", () =>
   withOffice(async (p) => {
+    await openNav(p);
     await p.click("#floorbtn");
     const portraits = () =>
       p.evaluate(() =>
@@ -524,6 +527,7 @@ test("agent cards use the chosen delegated appearance and keep parent portraits 
     );
     await choose(p, "Delegated agents", "People");
     await closePanel(p);
+    await openNav(p);
     await p.click("#floorbtn");
     assert.ok((await portraits()).every((d) => /^char[0-5]$/.test(d.key)));
     await capture(p, "people-roster-portraits");

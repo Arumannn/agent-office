@@ -7,6 +7,7 @@ const os = require("node:os");
 const path = require("node:path");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const baseURL = process.env.OFFICE_URL || "http://127.0.0.1:18113";
 let server, home;
 before(async () => {
@@ -182,6 +183,7 @@ test("connection guide explains each runtime and distinguishes demo from live tr
   }));
 test("setup commands copy with a selectable fallback and disclosures are keyboard accessible", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.click('#sheet-settings [data-sheet="sheet-setup"]');
     await p.evaluate(() =>
@@ -345,12 +347,14 @@ test("search matches the status and event names shown to users", () =>
         ],
       }),
     );
+    await openNav(p);
     await p.click("#floorbtn");
     for (const term of ["Needs input", "Completed", "Ended"]) {
       await p.fill("#trackSearch", term);
       assert.equal(await p.locator("#roster .agent-card").count(), 1);
     }
     await p.keyboard.press("Escape");
+    await openNav(p);
     await p.click("#eventsbtn");
     for (const term of ["Question asked", "Tool finished"]) {
       await p.fill("#eventSearch", term);
@@ -365,6 +369,7 @@ test("saved theme and desk settings survive a reload", () =>
     await p.reload();
     await p.waitForTimeout(1800);
     assert.equal(await p.locator("html").getAttribute("data-theme"), "amber");
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     assert.equal(await p.locator("#mc").inputValue(), "2");
   }));
@@ -446,6 +451,7 @@ test("empty runtime filter gives immediate recovery instead of install instructi
   }));
 test("roster search keeps focus and query through typing and polling", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.locator("#floorbtn").click();
     await p.locator("#trackSearch").pressSequentially("cli", { delay: 100 });
     await p.waitForTimeout(1700);
@@ -561,6 +567,7 @@ test("failed earlier saves preserve the latest queued edit", () =>
 test("focused settings controls update their selected state without losing focus", () =>
   withPage(async (p) => {
     await p.evaluate(() => saveSettings({ theme: "default" }));
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     const panel = p.locator("#settingsbox");
     const amber = panel.getByRole("button", { name: "Amber", exact: true });
@@ -589,6 +596,7 @@ test("malformed event names do not interrupt polling or activity rendering", () 
     });
     assert.equal(await p.locator("#connection").innerText(), "Connected");
     assert.equal(await p.locator("#latest-event").innerText(), "event");
+    await openNav(p);
     await p.locator("#eventsbtn").click();
     assert.ok((await p.locator("#eventbox").innerText()).includes("event"));
   }));
@@ -606,6 +614,7 @@ test("agent and event text cannot become executable markup", () =>
       s.agents[0].detail = '<img src=x onerror="window.__injected=1">';
       applyState(s);
     });
+    await openNav(p);
     await p.locator("#floorbtn").click();
     await p.waitForTimeout(200);
     assert.equal(await p.evaluate(() => window.__injected), undefined);
@@ -618,6 +627,7 @@ test("mobile scene and dialogs fit, loaded sprites are valid", () =>
     await p.setViewportSize({ width: 390, height: 844 });
     await p.waitForTimeout(500);
     assert.ok(await p.evaluate(() => document.body.scrollWidth <= innerWidth));
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     const box = await p.locator("#sheet-settings").boundingBox();
     assert.ok(box.x >= 0 && box.x + box.width <= 390);
@@ -685,6 +695,7 @@ test("all sprite images load and canvas frames stay within room bounds on deskto
   }));
 test("activity search persists, tasks open inspector, Escape restores focus", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.locator("#eventsbtn").click();
     await p.locator("#eventSearch").fill("terminal");
     await p.waitForTimeout(1700);
@@ -695,6 +706,7 @@ test("activity search persists, tasks open inspector, Escape restores focus", ()
       await p.evaluate(() => document.activeElement.id),
       "eventsbtn",
     );
+    await openNav(p);
     await p.locator("#tasksbtn").click();
     await p.locator("#taskboard .agent-card").first().click();
     assert.ok(await p.locator("#sheet-inspector").isVisible());
@@ -706,6 +718,7 @@ test("activity search persists, tasks open inspector, Escape restores focus", ()
   }));
 test("layout export and import round-trip real server settings", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     const download = p.waitForEvent("download");
     await p.locator("#export-settings").click();
@@ -750,10 +763,12 @@ test("pause, zoom, runtime filters, snapshot download, achievements and furnitur
     const download = p.waitForEvent("download");
     await p.locator("#capturebtn").click();
     assert.equal((await download).suggestedFilename(), "agent-office.png");
+    await openNav(p);
     await p.locator("#achbtn").click();
     await p.locator('[data-filter="earned"]').click();
     assert.ok((await p.locator(".ach.have").count()) > 0);
     await p.keyboard.press("Escape");
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator("#clear-furniture").click();
     await p.waitForFunction(() => pendingSaves === 0);
@@ -830,6 +845,7 @@ test("all new furniture can be placed, retained, and removed through the canvas"
       "coatrack",
     ];
     for (const [i, kind] of kinds.entries()) {
+      await openNav(p);
       await p.locator("#settingsbtn").click();
       await p
         .locator("#furniture-tools")
@@ -887,6 +903,7 @@ test("all new furniture can be placed, retained, and removed through the canvas"
     );
     await p.setViewportSize({ width: 390, height: 844 });
     await p.waitForTimeout(200);
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p
       .locator("#furniture-tools")
@@ -923,6 +940,7 @@ test("every navigation panel opens, traps focus, and closes on desktop and mobil
       ]) {
         const trigger = p.locator("#" + id);
         const panelId = await trigger.getAttribute("data-sheet");
+        await openNav(p);
         await trigger.click();
         const panel = p.locator("#" + panelId);
         assert.equal(await panel.isVisible(), true);
@@ -943,8 +961,13 @@ test("every navigation panel opens, traps focus, and closes on desktop and mobil
         await p.keyboard.press("Escape");
         assert.equal(await panel.isVisible(), false);
         assert.equal(await trigger.getAttribute("aria-expanded"), "false");
+        // On narrow screens the trigger sits in the collapsed menu, so focus
+        // returns to the Menu button that reveals it.
+        const returned = (await trigger.isVisible())
+          ? trigger
+          : p.locator("#menu-toggle");
         assert.equal(
-          await trigger.evaluate((b) => b === document.activeElement),
+          await returned.evaluate((b) => b === document.activeElement),
           true,
         );
       }
@@ -952,6 +975,7 @@ test("every navigation panel opens, traps focus, and closes on desktop and mobil
   }));
 test("malformed layout import leaves settings intact", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     const theme = await p.evaluate(() => settings.theme);
     await p.locator("#import-settings").setInputFiles({
@@ -1010,6 +1034,7 @@ test("readable local fonts, decorative icons, labels, and catalog previews load"
           );
         }
     }
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     assert.deepEqual(
       await p
@@ -1074,6 +1099,7 @@ test("crowded mobile labels leave approval alerts visible", () =>
 test("furniture supports keyboard placement, collision feedback, undo and Done", () =>
   withPage(async (p) => {
     await p.evaluate(() => saveSettings({ furniture: [], decorations: false }));
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator('#furniture-tools [data-kind="coffee"]').click();
     const blocked = await p.evaluate(() => {
@@ -1113,6 +1139,7 @@ test("furniture supports keyboard placement, collision feedback, undo and Done",
 test("failed furniture undo and redo retain a retryable history", () =>
   withPage(async (p) => {
     await p.evaluate(() => saveSettings({ furniture: [], decorations: false }));
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.click('#furniture-tools [data-kind="coffee"]');
     await p.locator("#c").press("ArrowRight");
@@ -1160,6 +1187,7 @@ test("a failed layout import preserves the current room and undo history", () =>
     await p.evaluate(() =>
       saveSettings({ furniture: [], decorations: false, theme: "default" }),
     );
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.click('#furniture-tools [data-kind="coffee"]');
     await p.locator("#c").press("ArrowRight");
@@ -1233,6 +1261,7 @@ test("mobile floor swipes scroll at Fit and pan only while zoomed or editing", (
       assert.equal(await p.evaluate(() => scrollY), 0);
       assert.ok(await p.evaluate(() => officeScene.pan.y < -100));
       await p.click("#zoom-fit");
+      await openNav(p);
       await p.click("#settingsbtn");
       await p.click('#furniture-tools [data-kind="coffee"]');
       await p.evaluate(() => scrollTo(0, 0));
@@ -1268,6 +1297,7 @@ test("move props by mouse and keyboard, undo/redo, cancel, remove and reload", (
         decorations: false,
       }),
     );
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator("#edit-furniture").click();
     await p.locator("#c").press("Space");
@@ -1331,6 +1361,7 @@ test("move props by mouse and keyboard, undo/redo, cancel, remove and reload", (
     await p.waitForFunction(() => initialized);
     assert.deepEqual(await p.evaluate(() => settings.furniture), dragged);
     await p.setViewportSize({ width: 390, height: 844 });
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator("#edit-furniture").click();
     await p.locator("#c").press("Space");
@@ -1398,6 +1429,7 @@ test("custom furniture resolves around desks after mobile reflow without changin
         path: path.join(process.env.OFFICE_SCREENSHOTS, "mobile-furniture.png"),
         fullPage: true,
       });
+    await openNav(p);
     await p.click("#settingsbtn");
     await p.click("#edit-furniture");
     await p.locator("#c").press("Space");
@@ -1431,6 +1463,7 @@ test("the full agent nameplate is clickable", () =>
 test("external furniture changes invalidate stale selection and undo", () =>
   withPage(async (p) => {
     await p.evaluate(() => saveSettings({ furniture: [], decorations: false }));
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator('[data-kind="cooler"]').click();
     await p.locator("#c").press("ArrowRight");
@@ -1453,6 +1486,7 @@ test("a settings save response invalidates an externally replaced selected prop"
     await p.evaluate(() =>
       saveSettings({ furniture: [{ kind: "cooler", x: 0.5, y: 0.95 }] }),
     );
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator("#edit-furniture").click();
     await p.locator("#c").press("Space");
@@ -1497,6 +1531,7 @@ test("both cats have independent click targets and hidden pets leave no targets"
   }));
 test("achievement rewards and XP are searchable without losing focus during polling", () =>
   withPage(async (p) => {
+    await openNav(p);
     await p.locator("#achbtn").click();
     await p.locator('[data-filter="rewards"]').click();
     assert.equal(await p.locator(".ach").count(), 14);
@@ -1529,18 +1564,21 @@ test("capture reviewed desktop, mobile, settings, badges, and night scenes", () 
     await p.locator("#pausebtn").click();
     await p.waitForTimeout(200);
     await p.screenshot({ path: path.join(dir, "desktop-studio.png") });
+    await openNav(p);
     await p.locator("#achbtn").click();
     await p.screenshot({ path: path.join(dir, "achievements.png") });
     await p.locator('[data-filter="rewards"]').click();
     await p.screenshot({ path: path.join(dir, "room-rewards.png") });
     await p.locator('[data-filter="all"]').click();
     await p.keyboard.press("Escape");
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.screenshot({ path: path.join(dir, "desktop-settings.png") });
     await p.keyboard.press("Escape");
     await p.evaluate(() =>
       saveSettings({ furniture: [{ kind: "coffee", x: 0.55, y: 0.95 }] }),
     );
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.locator("#edit-furniture").click();
     await p.locator("#c").press("Space");
@@ -1565,6 +1603,7 @@ test("capture reviewed desktop, mobile, settings, badges, and night scenes", () 
       path: path.join(dir, "mobile-studio.png"),
       fullPage: true,
     });
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p.screenshot({ path: path.join(dir, "mobile-settings.png") });
     await p.keyboard.press("Escape");
@@ -1581,6 +1620,7 @@ test("capture reviewed desktop, mobile, settings, badges, and night scenes", () 
     );
     await p.evaluate(() => officeScene.draw(0));
     await p.screenshot({ path: path.join(dir, "workshop-desktop.png") });
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     await p
       .locator('#furniture-tools [data-kind="whiteboard"]')
@@ -1598,6 +1638,7 @@ test("confirmed reset clears only progress and events in the isolated test works
   withPage(async (p) => {
     if (process.env.OFFICE_URL) return; // Never reset a caller-supplied server.
     const theme = await p.evaluate(() => settings.theme);
+    await openNav(p);
     await p.locator("#settingsbtn").click();
     p.once("dialog", (d) => d.accept());
     await p.locator("#resetbtn").click();
@@ -1605,4 +1646,44 @@ test("confirmed reset clears only progress and events in the isolated test works
     assert.equal(await p.evaluate(() => progress.xp), 0);
     assert.equal(await p.evaluate(() => settings.theme), theme);
     assert.ok(await p.locator("#empty-state").isVisible());
+  }));
+
+test("dashboard shell: sidebar, clock, office-name title and the collapsible mobile menu", () =>
+  withPage(async (p) => {
+    assert.equal(await p.textContent("#app-title"), "Hermes Mission Control");
+    assert.match(await p.textContent("#clock-time"), /^\d\d:\d\d$/);
+    assert.notEqual((await p.textContent("#clock-date")).trim(), "");
+    assert.equal(await p.locator("#menu-toggle").isVisible(), false);
+    for (const id of ["homebtn", "floorbtn", "tasksbtn", "eventsbtn"])
+      assert.equal(await p.locator("#" + id).isVisible(), true);
+    const box = await p.locator("#toolbar").boundingBox();
+    assert.ok(box.x < 10 && box.width < 260, "sidebar sits at the left edge");
+    await p.evaluate(() => saveSettings({ room_name: "Studio Alpha" }));
+    await p.waitForFunction(() => pendingSaves === 0);
+    assert.equal(await p.textContent("#app-title"), "Studio Alpha");
+    await p.evaluate(() => saveSettings({ room_name: "" }));
+    await p.waitForFunction(() => pendingSaves === 0);
+    assert.equal(await p.textContent("#app-title"), "Hermes Mission Control");
+
+    await p.setViewportSize({ width: 390, height: 844 });
+    const toggle = p.locator("#menu-toggle");
+    assert.equal(await toggle.isVisible(), true);
+    assert.equal(await toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(await p.locator("#floorbtn").isVisible(), false);
+    const canvas = await p.locator("#c").boundingBox();
+    assert.ok(
+      canvas.y < 260,
+      "the canvas leads the page when the menu is closed",
+    );
+    await toggle.focus();
+    await p.keyboard.press("Enter");
+    assert.equal(await toggle.getAttribute("aria-expanded"), "true");
+    assert.equal(await p.locator("#floorbtn").isVisible(), true);
+    await p.keyboard.press("Enter");
+    assert.equal(await p.locator("#floorbtn").isVisible(), false);
+    await toggle.click();
+    await p.click("#tasksbtn");
+    assert.equal(await p.locator("#sheet-tasks").isVisible(), true);
+    await p.keyboard.press("Escape");
+    assert.equal(await toggle.getAttribute("aria-expanded"), "false");
   }));

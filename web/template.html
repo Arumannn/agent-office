@@ -36,18 +36,22 @@
         <div class="brand">
           <img src="assets/office.svg" alt="" width="40" height="40" />
           <div>
-            <h1>Agent Office<span class="edition">LOCAL WORKSPACE</span></h1>
+            <h1 id="app-title">Hermes Mission Control</h1>
             <span class="tagline">Agent status, usage, and activity.</span>
           </div>
         </div>
         <div class="connection">
           <span id="connection-dot"></span
           ><span id="connection">Connecting</span
-          ><span id="mode" hidden>DEMO</span>
+          ><span id="mode" hidden>DEMO</span
+          ><span class="edition">LOCAL WORKSPACE</span>
         </div>
         <div class="rankbox">
           <span id="rank">Intern · 0 XP</span
           ><span id="xpbar"><span id="xpfill"></span></span>
+        </div>
+        <div class="clock" id="clock">
+          <time id="clock-date"></time><time id="clock-time"></time>
         </div>
         <a
           class="repo-link"
@@ -59,85 +63,96 @@
         >
       </header>
       <nav id="toolbar" aria-label="Office controls">
-        <div class="cluster">
-          <button
-            class="btn"
-            id="floorbtn"
-            data-sheet="sheet-floor"
-            aria-expanded="false"
-          >
-            Agents <span id="agent-total">0</span>
-          </button>
-          <button
-            class="btn"
-            id="tasksbtn"
-            data-sheet="sheet-tasks"
-            aria-expanded="false"
-          >
-            Tasks
-          </button>
-          <button
-            class="btn"
-            id="eventsbtn"
-            data-sheet="sheet-events"
-            aria-expanded="false"
-          >
-            Activity
-          </button>
-          <button
-            class="btn"
-            id="achbtn"
-            data-sheet="sheet-unlocks"
-            aria-expanded="false"
-          >
-            Achievements
-          </button>
-          <button
-            class="btn"
-            id="settingsbtn"
-            data-sheet="sheet-settings"
-            aria-expanded="false"
-          >
-            Customize
-          </button>
-        </div>
-        <div class="cluster secondary">
-          <label class="sr-only" for="filterbtn">Floor runtime</label
-          ><select
-            id="filterbtn"
-            class="btn"
-            aria-label="Floor runtime"
-            title="Filter the office floor. Agent and task panels include all runtimes."
-          >
-            <option value="every">All runtimes</option>
-            <option value="hermes">Hermes</option>
-            <option value="claude">Claude Code</option>
-            <option value="codex">Codex</option>
-            <option value="gemini">Gemini CLI</option>
-            <option value="opencode">OpenCode</option>
-            <option value="telegram">Telegram</option>
-            <option value="cli">CLI</option>
-          </select>
-          <button class="btn" id="themeNextbtn" title="Change theme (T)">
-            Plum
-          </button>
-          <button
-            class="btn"
-            id="sound"
-            aria-pressed="false"
-            title="Notification sounds"
-          >
-            Sound off
-          </button>
-          <button
-            class="btn"
-            id="helpbtn"
-            data-sheet="sheet-legend"
-            aria-expanded="false"
-            aria-label="Help and shortcuts"
-          >
-            ?
-          </button>
+        <button
+          class="btn"
+          id="menu-toggle"
+          aria-expanded="false"
+          aria-controls="nav-items"
+        >
+          Menu
+        </button>
+        <div id="nav-items">
+          <div class="cluster">
+            <button class="btn" id="homebtn" aria-current="page">Home</button>
+            <button
+              class="btn"
+              id="floorbtn"
+              data-sheet="sheet-floor"
+              aria-expanded="false"
+            >
+              Agents <span id="agent-total">0</span>
+            </button>
+            <button
+              class="btn"
+              id="tasksbtn"
+              data-sheet="sheet-tasks"
+              aria-expanded="false"
+            >
+              Tasks
+            </button>
+            <button
+              class="btn"
+              id="eventsbtn"
+              data-sheet="sheet-events"
+              aria-expanded="false"
+            >
+              Activity
+            </button>
+            <button
+              class="btn"
+              id="achbtn"
+              data-sheet="sheet-unlocks"
+              aria-expanded="false"
+            >
+              Achievements
+            </button>
+            <button
+              class="btn"
+              id="settingsbtn"
+              data-sheet="sheet-settings"
+              aria-expanded="false"
+            >
+              Customize
+            </button>
+          </div>
+          <div class="cluster secondary">
+            <label class="sr-only" for="filterbtn">Floor runtime</label
+            ><select
+              id="filterbtn"
+              class="btn"
+              aria-label="Floor runtime"
+              title="Filter the office floor. Agent and task panels include all runtimes."
+            >
+              <option value="every">All runtimes</option>
+              <option value="hermes">Hermes</option>
+              <option value="claude">Claude Code</option>
+              <option value="codex">Codex</option>
+              <option value="gemini">Gemini CLI</option>
+              <option value="opencode">OpenCode</option>
+              <option value="telegram">Telegram</option>
+              <option value="cli">CLI</option>
+            </select>
+            <button class="btn" id="themeNextbtn" title="Change theme (T)">
+              Plum
+            </button>
+            <button
+              class="btn"
+              id="sound"
+              aria-pressed="false"
+              title="Notification sounds"
+            >
+              Sound off
+            </button>
+            <button
+              class="btn"
+              id="helpbtn"
+              data-sheet="sheet-legend"
+              aria-expanded="false"
+              aria-label="Help and shortcuts"
+            >
+              ?
+            </button>
+          </div>
         </div>
       </nav>
       <aside

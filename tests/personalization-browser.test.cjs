@@ -7,6 +7,7 @@ const fs = require("node:fs"),
   path = require("node:path");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, ".."),
   base = "http://127.0.0.1:18126";
 const expected = { hermes: 0, claude: 1, opencode: 2, codex: 3, child: 4 };
@@ -117,6 +118,7 @@ async function ledger(p) {
   };
 }
 async function chooseDesk(p) {
+  await openNav(p);
   await p.click("#floorbtn");
   await p.locator('#roster [data-agent="hermes"]').click();
   await p.selectOption("#agent-seat-select", "5");

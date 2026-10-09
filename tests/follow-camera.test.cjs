@@ -2,6 +2,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { observerFixture } = require("./observer-fixture.cjs");
+const { openNav } = require("./nav.cjs");
 const events = ["alpha", "beta", "gamma"].map((id, index) => ({
   event: "session_start",
   session_id: id,
@@ -10,6 +11,7 @@ const events = ["alpha", "beta", "gamma"].map((id, index) => ({
 }));
 
 async function follow(page, id = "alpha") {
+  await openNav(page);
   await page.click("#floorbtn");
   await page.locator(`#roster [data-agent="${id}"]`).click();
   await page
@@ -57,9 +59,11 @@ test("following uses the visible character, survives panel switches, and leaves 
       Math.abs(view.pan.x) + Math.abs(view.pan.y) > 0,
       "Follow actually moves the camera",
     );
+    await openNav(page);
     await page.click("#tasksbtn");
     await page.keyboard.press("Escape");
     assert.equal(await page.evaluate(() => officeScene.following), "alpha");
+    await openNav(page);
     await page.click("#floorbtn");
     await page.locator('#roster [data-agent="alpha"]').click();
     const stop = page.getByRole("button", {
@@ -117,6 +121,7 @@ test("manual pan, Fit, runtime filtering, and furniture editing cancel follow", 
     assert.equal(await page.evaluate(() => officeScene.following), null);
     await page.selectOption("#filterbtn", "every");
     await follow(page);
+    await openNav(page);
     await page.click("#settingsbtn");
     await page.getByRole("button", { name: "Pet bed", exact: true }).click();
     assert.equal(await page.evaluate(() => officeScene.following), null);

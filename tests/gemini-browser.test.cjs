@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { observerFixture } = require("./observer-fixture.cjs");
+const { openNav } = require("./nav.cjs");
 const root = path.resolve(__dirname, "..");
 
 test("Gemini lifecycle hooks render their own runtime and keep unreported work and usage unknown", async () => {
@@ -48,6 +49,7 @@ test("Gemini lifecycle hooks render their own runtime and keep unreported work a
         ),
       );
       const before = await state();
+      await openNav(page);
       await page.click("#floorbtn");
       const card = page.locator('#roster [data-agent="gemini-ui"]');
       assert.equal(
@@ -90,6 +92,7 @@ test("Gemini lifecycle hooks render their own runtime and keep unreported work a
       assert.equal(await page.inputValue("#filterbtn"), "gemini");
       if (await page.evaluate(() => opened !== null))
         await page.keyboard.press("Escape");
+      await openNav(page);
       await page.click("#eventsbtn");
       await page.selectOption("#event-runtime", "gemini");
       assert.ok(
@@ -99,6 +102,7 @@ test("Gemini lifecycle hooks render their own runtime and keep unreported work a
       );
       assert.ok((await page.locator("#eventbox .event-identity").count()) >= 2);
       await page.keyboard.press("Escape");
+      await openNav(page);
       await page.click("#settingsbtn");
       await page.click('#sheet-settings [data-sheet="sheet-setup"]');
       await page.selectOption("#setup-runtime", "gemini");
@@ -135,6 +139,7 @@ test("Gemini lifecycle hooks render their own runtime and keep unreported work a
       if (await page.evaluate(() => opened !== null))
         await page.keyboard.press("Escape");
       await page.setViewportSize({ width: 320, height: 720 });
+      await openNav(page);
       await page.click("#floorbtn");
       await page.locator('#roster [data-agent="gemini-ui"]').click();
       assert.equal(

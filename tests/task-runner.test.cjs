@@ -6,6 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 const { chromium } = require("playwright");
+const { openNav } = require("./nav.cjs");
 
 const script = path.resolve(__dirname, "../web/js/task-runner.js");
 let browser;
@@ -592,6 +593,7 @@ test(
           initialized &&
           window.officeTaskRunner,
       );
+      await openNav(page);
       await page.click("#tasksbtn");
       await page.click('[data-task-view="draft"]');
       assert.equal(await page.locator("#task-draft-run").isDisabled(), false);

@@ -246,6 +246,7 @@ function applyTheme() {
     "palette",
     THEMES.find((t) => t.id === settings.theme)?.name || "Renaissance",
   );
+  $("app-title").textContent = settings.room_name || "Hermes Mission Control";
   $("room-name").textContent =
     settings.room_name ||
     LAYOUTS.find((l) => l.id === settings.layout)?.name ||
@@ -428,6 +429,12 @@ function closeSheets() {
     !returnFocus.disabled
   )
     returnFocus.focus({ preventScroll: true });
+  else if (
+    returnFocus?.closest("#nav-items") &&
+    $("menu-toggle").getClientRects().length
+  )
+    // The narrow-screen menu collapsed when the panel opened.
+    $("menu-toggle").focus({ preventScroll: true });
   else if (returnFocus) $("c").focus({ preventScroll: true });
   returnFocus = null;
   persistView();
@@ -2550,6 +2557,8 @@ document.addEventListener("keydown", (e) => {
   }
 });
 for (const [id, name] of Object.entries({
+  homebtn: "house",
+  "menu-toggle": "menu",
   floorbtn: "users",
   tasksbtn: "list-checks",
   eventsbtn: "activity",
@@ -2573,6 +2582,39 @@ for (const [id, name] of Object.entries({
 }))
   $(id).prepend(icon(name));
 labelButton($("helpbtn"), "circle-help", "Help");
+function tickClock() {
+  const now = new Date();
+  $("clock-date").textContent = now.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  $("clock-time").textContent = now.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  $("clock-time").dateTime = now.toISOString();
+}
+tickClock();
+setInterval(tickClock, 15000);
+// Home is the dashboard itself: it returns focus to the office canvas.
+$("homebtn").onclick = () => {
+  $("c").focus({ preventScroll: true });
+  $("c").scrollIntoView({ block: "nearest" });
+  closeMenu();
+};
+function closeMenu() {
+  $("toolbar").dataset.open = "false";
+  $("menu-toggle").setAttribute("aria-expanded", "false");
+}
+$("menu-toggle").onclick = () => {
+  const open = $("toolbar").dataset.open !== "true";
+  $("toolbar").dataset.open = String(open);
+  $("menu-toggle").setAttribute("aria-expanded", String(open));
+};
+$("nav-items").addEventListener("click", (e) => {
+  if (e.target.closest("button[data-sheet], #homebtn")) closeMenu();
+});
 labelButton($("zoom-fit"), "scan", "Fit");
 $("zoom-in").replaceChildren(icon("plus"));
 $("zoom-out").replaceChildren(icon("minus"));

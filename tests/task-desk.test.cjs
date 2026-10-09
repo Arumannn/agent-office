@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { observerFixture } = require("./observer-fixture.cjs");
+const { openNav } = require("./nav.cjs");
 
 // Capture evidence after a paint opportunity and verify the saved image itself.
 // This deliberately has no screenshot retries or expected font/pixel snapshot.
@@ -96,6 +97,7 @@ async function captureVisibleDraft(page, filename) {
 }
 
 async function openDraft(page) {
+  await openNav(page);
   await page.click("#tasksbtn");
   assert.equal(
     await page.locator('[data-task-view="draft"]').count(),

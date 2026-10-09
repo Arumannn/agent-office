@@ -3,6 +3,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { observerFixture } = require("./observer-fixture.cjs");
 const { fetchSettings } = require("./settings-helper.cjs");
+const { openNav } = require("./nav.cjs");
 
 async function freePoint(page, distant = false) {
   return page.evaluate((distant) => {
@@ -37,6 +38,7 @@ async function freePoint(page, distant = false) {
   }, distant);
 }
 async function placeFern(page) {
+  await openNav(page);
   await page.click("#settingsbtn");
   await page.click('#furniture-tools [data-kind="fern"]');
   const point = await freePoint(page);
@@ -130,6 +132,7 @@ for (const leave of ["Done", "Escape"]) {
         assert.notDeepEqual((await state()).settings.furniture, before);
         assert.equal(await page.textContent("#edit-message"), message);
         await page.unroute("**/settings", delayed.handler);
+        await openNav(page);
         await page.click("#settingsbtn");
         await page.click('#furniture-tools [data-kind="fern"]');
         assert.match(await page.textContent("#edit-message"), /^Place /);

@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { observerFixture } = require("./observer-fixture.cjs");
+const { openNav } = require("./nav.cjs");
 
 test("the live observer serves nested arcade media with correct types and unchanged bytes", async () => {
   await observerFixture({}, async ({ base }) => {
@@ -112,6 +113,7 @@ test("coffee, water and plants react without changing observer work progress", a
       const time = await page.evaluate(() => officeScene.time);
       await page.waitForTimeout(250);
       assert.equal(await page.evaluate(() => officeScene.time), time);
+      await openNav(page);
       await page.locator("#settingsbtn").click();
       await page.locator('[data-activity="Brew coffee"]').click();
       assert.equal(await page.locator("#sheet-settings").isVisible(), false);
@@ -140,6 +142,7 @@ test("wall switch and mobile controls remain usable with room decorations hidden
         const box = await page.locator("#" + id).boundingBox();
         assert.ok(box.width >= 44 && box.height >= 44);
       }
+      await openNav(page);
       await page.locator("#settingsbtn").click();
       assert.equal(
         await page.locator('[data-activity="Brew coffee"]').isDisabled(),
@@ -170,6 +173,7 @@ test("both new characters render complete animation frames and save as individua
           officeScene.sprites["moss-engineer"] &&
           officeScene.sprites["orbit-courier"],
       );
+      await openNav(page);
       await page.locator("#floorbtn").click();
       await page.locator("#roster [data-agent]").first().click();
       for (const key of ["moss-engineer", "orbit-courier"]) {
