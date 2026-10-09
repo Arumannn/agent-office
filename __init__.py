@@ -490,6 +490,17 @@ def _serve(task_runner=None, on_ready=None) -> None:
                     self.send_response(200)
                     self.send_header("Content-Type", "application/json")
                     self.send_header("Cache-Control", "no-store")
+                elif route == "/system":
+                    try:
+                        try:
+                            from .system_stats import read as read_system
+                        except ImportError:
+                            from system_stats import read as read_system
+                        data = read_system(_office_dir())
+                    except ImportError:
+                        data = {"available": False}
+                    self.respond(200, data)
+                    return
                 elif route == "/history":
                     from urllib.parse import parse_qs, urlsplit
                     query = parse_qs(urlsplit(self.path).query)

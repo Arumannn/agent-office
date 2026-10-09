@@ -509,6 +509,64 @@
     updateApprovals();
   }
 
+  // Host figures come from /system; when it is unavailable the card stays hidden.
+  const gigabytes = (bytes) => (bytes / 1024 ** 3).toFixed(1);
+  const percent = (used, total) =>
+    total > 0 ? Math.round((100 * used) / total) + "%" : NOT_REPORTED;
+  function updateSystem(data) {
+    const panel = $("panel-system");
+    const ok = data?.available === true;
+    panel.hidden = !ok;
+    if (!ok) return;
+    const rows = [
+      [
+        "CPU",
+        typeof data.cpu_percent === "number"
+          ? data.cpu_percent + "%"
+          : NOT_REPORTED,
+      ],
+      [
+        "RAM",
+        data.memory
+          ? gigabytes(data.memory.used_bytes) +
+            " / " +
+            gigabytes(data.memory.total_bytes) +
+            " GB"
+          : NOT_REPORTED,
+      ],
+      [
+        "Disk",
+        data.disk
+          ? percent(data.disk.used_bytes, data.disk.total_bytes) +
+            " of " +
+            gigabytes(data.disk.total_bytes) +
+            " GB"
+          : NOT_REPORTED,
+      ],
+    ];
+    if (!changed("system", rows)) return;
+    $("system-figures").replaceChildren(
+      ...rows.flatMap(([name, value]) => [
+        node("dt", "", name),
+        node("dd", "", value),
+      ]),
+    );
+  }
+  async function pollSystem() {
+    if (document.hidden) return;
+    try {
+      const response = await fetch("system", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(4000),
+      });
+      updateSystem(response.ok ? await response.json() : null);
+    } catch {
+      updateSystem(null);
+    }
+  }
+  pollSystem();
+  setInterval(pollSystem, 5000);
+
   $("env-change").onclick = () => $("themeNextbtn").click();
   $("board-new").onclick = () => openSheet("sheet-tasks");
   $("logs-open").onclick = () => openSheet("sheet-events");

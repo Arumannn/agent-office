@@ -20,7 +20,9 @@ test("with no reports every panel says so and invents no numbers or controls", a
     );
     assert.match(await page.textContent("#dash-notices"), /No notifications/);
     assert.equal(await page.locator("#dash-bottom .task-row").count(), 0);
-    const panels = await page.locator(".dash-panel").allInnerTexts();
+    const panels = await page
+      .locator(".dash-panel:not(#panel-system)")
+      .allInnerTexts();
     assert.equal(
       panels.some((text) => /\d\s*%/.test(text)),
       false,
@@ -148,5 +150,28 @@ test("reported agents, tasks, subagents and requests appear literally and stay o
       before,
       "panels never award XP",
     );
+  });
+});
+
+test("System card shows real host figures, or stays hidden when none are reported", async () => {
+  await observerFixture({ events: [] }, async ({ page }) => {
+    const linux = process.platform === "linux";
+    await page.waitForFunction(() => initialized);
+    if (linux) {
+      await page.waitForSelector("#panel-system:not([hidden])");
+      const text = await page.textContent("#system-figures");
+      assert.match(text, /CPU/);
+      assert.match(text, /RAM\s*\d+\.\d \/ \d+\.\d GB/);
+      assert.match(text, /Disk\s*\d+% of/);
+    }
+    // An unavailable report hides the card instead of showing invented values.
+    await page.route("**/system", (route) =>
+      route.fulfill({ json: { available: false } }),
+    );
+    await page.evaluate(() =>
+      document.dispatchEvent(new Event("visibilitychange")),
+    );
+    await page.waitForTimeout(5600);
+    assert.equal(await page.locator("#panel-system").isHidden(), true);
   });
 });
