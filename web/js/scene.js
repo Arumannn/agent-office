@@ -703,8 +703,10 @@ class OfficeScene {
       r(3, 24, w - 6, 3, t.trim);
       r(3, 27, w - 6, 2, "#15182430");
     }
-    this.image("DOOR", 12, 5, 14, 23);
-    this.image("clock", 34, 8, 10, 10);
+    if (!(hall && this.hallFixture?.("DOOR", 12, 5, 14, 23)))
+      this.image("DOOR", 12, 5, 14, 23);
+    if (!(hall && this.hallFixture?.("clock", 34, 8, 10, 10)))
+      this.image("clock", 34, 8, 10, 10);
     // A visible wall switch also works when room decorations are hidden.
     r(w - 17, 11, 7, 10, "#ded7c6");
     r(

@@ -42,6 +42,7 @@ vm.runInContext(
   fs.readFileSync(path.join(root, "web/js/data.js"), "utf8") +
     fs.readFileSync(path.join(root, "web/js/scene.js"), "utf8") +
     fs.readFileSync(path.join(root, "web/js/hall.js"), "utf8") +
+    fs.readFileSync(path.join(root, "web/js/hall-props.js"), "utf8") +
     ";globalThis.Scene=OfficeScene;globalThis.defaults=DEFAULT_SETTINGS;globalThis.sizes=PROP_SIZES;",
   model,
 );
