@@ -54,7 +54,16 @@ def test_deep_valid_legacy_json_cannot_block_following_observations(tmp_path, mo
 def test_settings_recover_from_non_object_file(tmp_path, monkeypatch):
     monkeypatch.setattr(plugin, '_office_dir', lambda: tmp_path)
     (tmp_path / 'settings.json').write_text('[1,2]')
-    assert plugin._load_settings()['theme'] == 'default'
+    assert plugin._load_settings()['theme'] == 'renaissance'
+
+
+def test_every_theme_id_is_accepted_including_legacy_ones(tmp_path, monkeypatch):
+    monkeypatch.setattr(plugin, '_office_dir', lambda: tmp_path)
+    for theme in ('renaissance', 'default', 'midnight', 'amber', 'juniper'):
+        (tmp_path / 'settings.json').write_text('{"theme": "%s"}' % theme)
+        assert plugin._load_settings()['theme'] == theme
+    (tmp_path / 'settings.json').write_text('{"theme": "unknown"}')
+    assert plugin._load_settings()['theme'] == 'renaissance'
 
 
 def test_settings_validate_values_and_keep_valid_prefs(tmp_path, monkeypatch):

@@ -99,7 +99,7 @@ def _settings_path() -> Path:
 
 _DEFAULTS = {
     "layout": "open",
-    "theme": "default",
+    "theme": "renaissance",
     "desk_style": "walnut",
     "subagent_style": "robot",
     "sound": False,
@@ -163,7 +163,7 @@ def _valid_settings(data: Any) -> Dict[str, Any]:
     if not isinstance(data, dict):
         return {}
     out = {}
-    choices = {"layout": {"open", "bullpen"}, "theme": {"default", "midnight", "amber", "juniper"},
+    choices = {"layout": {"open", "bullpen"}, "theme": {"renaissance", "default", "midnight", "amber", "juniper"},
                "desk_style": {"classic", "walnut", "slate"},
                "subagent_style": {"robot", "people"},
                "ambience": {"auto", "day", "night"},

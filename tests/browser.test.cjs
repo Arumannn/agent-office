@@ -841,7 +841,13 @@ test("all new furniture can be placed, retained, and removed through the canvas"
           t = s.transform;
         for (let y = s.grid.h - 12; y > 40; y -= 4)
           for (let x = 28; x < s.grid.w - 20; x += 4)
-            if (s.placement({ x, y }).valid)
+            // Pixel clicks round to a fraction of a logical unit, so the
+            // spot must stay valid slightly to either side of the sample.
+            if (
+              [-0.1, 0, 0.1].every(
+                (d) => s.placement({ x: x + d, y: y + d }).valid,
+              )
+            )
               return {
                 x: b.left + t.ox + x * t.scale,
                 y: b.top + t.oy + y * t.scale,

@@ -223,3 +223,7 @@ two-frame activity lamp that obeys Pause and reduced motion; there is no
 celebration or perpetual success effect.
 See [generated-task-console.json](generated-task-console.json) for the exact
 prompt, source bounds, state semantics, normalization contract, and checksum.
+
+## Renaissance theme
+
+The `renaissance` theme adds no sprite or image assets: its palette is code and CSS. The one new asset, the Cormorant Garamond heading font, is credited in [../ATTRIBUTION.md](../ATTRIBUTION.md).

@@ -440,7 +440,7 @@ test("demo preferences persist separately and update the same UI", () =>
     assert.equal(await p.textContent("#room-name"), "My sample studio");
     assert.equal(
       await p.evaluate(() => window._state.settings.theme),
-      "midnight",
+      "default",
     );
     assert.equal(
       await p.evaluate(() => localStorage.getItem("unrelated-sentinel")),
@@ -450,7 +450,7 @@ test("demo preferences persist separately and update the same UI", () =>
       JSON.parse(localStorage.getItem("agent-office:static-preview:v1")),
     );
     assert.equal(stored.settings.room_name, "My sample studio");
-    assert.equal(stored.settings.theme, "midnight");
+    assert.equal(stored.settings.theme, "default");
     assert.equal(Object.hasOwn(stored, "agents"), false);
     assert.equal(Object.hasOwn(stored, "usage"), false);
   }));

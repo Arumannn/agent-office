@@ -2,6 +2,17 @@
 "use strict";
 const THEMES = [
   {
+    id: "renaissance",
+    name: "Renaissance",
+    floor: "#c9b48a",
+    plank: "#a8855a",
+    seam: "#7d6040",
+    wall: "#8a6a4a",
+    trim: "#4a3324",
+    rug: "#1f3f7a",
+    accent: "#d4a93a",
+  },
+  {
     id: "default",
     name: "Plum",
     floor: "#665861",
@@ -62,7 +73,7 @@ const LAYOUTS = [
 ];
 const DEFAULT_SETTINGS = Object.freeze({
   layout: "open",
-  theme: "default",
+  theme: "renaissance",
   desk_style: "walnut",
   subagent_style: "robot",
   sound: false,

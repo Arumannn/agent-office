@@ -5,10 +5,12 @@ All interface assets are served locally. No CDN is required at runtime.
 | Asset | Source | License |
 |---|---|---|
 | `fonts/geist-latin-variable.woff2` | [`@fontsource-variable/geist` 5.3.0](https://registry.npmjs.org/@fontsource-variable/geist/-/geist-5.3.0.tgz), unmodified `files/geist-latin-wght-normal.woff2` | [SIL Open Font License 1.1](fonts/OFL.txt) |
+| `fonts/cormorant-garamond-latin-variable.woff2` | [Cormorant Garamond](https://github.com/google/fonts/tree/main/ofl/cormorantgaramond) (Christian Thalmann, Cormorant Project Authors), variable `wght` TTF subset to Basic Latin, Latin-1 and common punctuation with `fonttools` 4.x (`pyftsubset`, WOFF2); used for serif headings | [SIL Open Font License 1.1](fonts/OFL-cormorant.txt) |
 | `../js/icons.js`, `office.svg` | Selected SVG paths (including move, redo, and reward controls) from [`lucide-static` 1.51.0](https://registry.npmjs.org/lucide-static/-/lucide-static-1.51.0.tgz); `building-2` in a project-colored badge for the brand | [ISC and retained derivative notices](icons/LICENSE.txt) |
 | `brands/claude.svg`, `brands/codex.svg`, `brands/gemini.svg`, `brands/opencode.svg`, `brands/telegram.svg` | [SVGL collection](https://github.com/pheralb/svgl/tree/main/static/library), linked from [svgl.app](https://svgl.app/directory/ai) | [SVGL MIT notice](brands/SVGL-LICENSE.txt), Pablo Hdez, 2022; the marks identify their respective products |
 
-The font SHA-256 is `19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1`.
+The Geist font SHA-256 is `19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1`.
+The Cormorant Garamond subset SHA-256 is `5c48ece1bdc6e7347ecef0e43d76cc885beab8c6210bb41db12bd9c7df4d8147`.
 Icon markup is bundled as static source; decorative icons are hidden from
 assistive technology, with text or accessible labels on their controls.
 

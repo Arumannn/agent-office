@@ -244,7 +244,7 @@ function applyTheme() {
   labelButton(
     $("themeNextbtn"),
     "palette",
-    THEMES.find((t) => t.id === settings.theme)?.name || "Plum",
+    THEMES.find((t) => t.id === settings.theme)?.name || "Renaissance",
   );
   $("room-name").textContent =
     settings.room_name ||
