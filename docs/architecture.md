@@ -44,6 +44,9 @@ execution disabled. See [the runner contract](local-task-runner.md).
 | [`web/js/office.js`](../web/js/office.js), [`editor.js`](../web/js/editor.js) | Polling, panels, settings reconciliation, and transactional furniture editing |
 | [`web/js/tasks-view.js`](../web/js/tasks-view.js) | Read-only source task lists, provenance, and focus-preserving reconciliation |
 | [`web/js/task-runner.js`](../web/js/task-runner.js) | Local run form, idempotent submission, captured output, and cancellation |
+| [`system_stats.py`](../system_stats.py) | Read-only host figures behind `GET /system`: `/proc` on Linux, `available: false` elsewhere, no effect on sessions, usage or XP |
+| [`web/js/dashboard.js`](../web/js/dashboard.js) | Agent, task, network, notification, approval and System panels, rendered from `/state` and `/system` without inventing values |
+| [`web/js/hall.js`](../web/js/hall.js), [`hall-props.js`](../web/js/hall-props.js) | Renaissance hall and furniture painted in code for the `renaissance` theme only; geometry and hit areas stay in `scene.js` and `data.js` |
 | [`web/js/data.js`](../web/js/data.js), [`scene.js`](../web/js/scene.js) | Shared geometry, assets, camera, movement, drawing, and hit testing |
 | [`web/js/aquarium.js`](../web/js/aquarium.js), [`jukebox.js`](../web/js/jukebox.js) | Optional fish simulation and gesture-started local music |
 | [`web/js/room.js`](../web/js/room.js), [`arcade.js`](../web/js/arcade.js) | Object actions, persistent light switches, and the arcade game lifecycle |

@@ -226,4 +226,4 @@ prompt, source bounds, state semantics, normalization contract, and checksum.
 
 ## Renaissance theme
 
-The `renaissance` theme adds no sprite or image assets: its palette is code and CSS. The one new asset, the Cormorant Garamond heading font, is credited in [../ATTRIBUTION.md](../ATTRIBUTION.md).
+The `renaissance` theme adds no sprite or image files. The hall (`web/js/hall.js`: marble floor, walls, windows, banners, lamps, rugs, columns and the statue pixel map) and the furniture, door and clock set (`web/js/hall-props.js`) are original drawings written for this project as canvas rectangles, authored on 2026-10-10. They copy no sprite, tile or layout from another game or project, and they do not use the earlier ImageGen atlases or the user-supplied mockup, which was used only as a mood reference. The existing atlases and character sheets above are unchanged and still draw the other themes. The one new font asset, Cormorant Garamond, is credited in [../ATTRIBUTION.md](../ATTRIBUTION.md).

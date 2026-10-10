@@ -87,12 +87,37 @@ The in-app **Connection guide** provides setup and troubleshooting. A reachable 
 - **Inspect history:** search retained events, focus on a session, inspect current activity, and export recorded data. The UI reconnects automatically and labels a retained scene when disconnected.
 - **Read reported usage:** token totals by runtime and model, plus usage for visible sessions. Missing values say **Not reported**; partial coverage remains visible. Dollar amounts are labeled runtime estimates, with their source. An optional cost threshold shows an alert without stopping a runtime.
 - **Arrange the room:** choose among **26 props**, place up to 24, move or remove custom furniture, undo/redo edits, and import/export preferences. The task terminal opens Local runs when the runner is enabled and reported lists otherwise. Its new screen states reflect actual local run status. The status beacon opens session activity and lights up for an observed input request. Saves enter edit history after server confirmation; a failed save preserves retryable edits. Layout reflow keeps saved positions intact.
-- **Make it yours:** choose a room theme, including Juniper, and classic, walnut, or slate desks. Give each agent a preferred desk and choose its default appearance, one of six people, the studio robot, Moss engineer, or Orbit courier. The new characters have walking, typing, and reading poses. Assignments use session IDs, so renaming an agent does not lose its preference. Appearance settings do not create activity or change XP.
+- **Make it yours:** choose a room theme (Renaissance, Plum, Midnight, Amber or Juniper), and classic, walnut, or slate desks. Give each agent a preferred desk and choose its default appearance, one of six people, the studio robot, Moss engineer, or Orbit courier. The new characters have walking, typing, and reading poses. Assignments use session IDs, so renaming an agent does not lose its preference. Appearance settings do not create activity or change XP.
 - **Use the camera:** follow an agent from its inspector, zoom, drag while zoomed, return to Fit, pause animation, or save a scene image. Following survives panel switches and stops on manual pan, Fit, editing, filtering out the agent, or its departure. Safe view preferences are remembered separately in the local observer and public demo. At Fit, mobile swipes scroll the page. Reduced-motion preferences pause motion without stopping tracking.
 
 Reported task lists come from OpenCode's `todo.updated` events or an imported Codex `exec --json` capture. Each list shows its source and observation time. Completed sessions keep their last reported list; ending a session does not mark unfinished rows complete. Missing reporting is distinct from a reported empty list. These snapshots do not award XP or keep a sprite alive. See the [source contracts and capture command](docs/runtime-observers.md).
 
 Claude hooks and the Gemini lifecycle adapter do not report token usage. Hermes reports supported main-loop API attempts. OpenCode reports assistant-message counters and runtime cost estimates. Codex usage can be imported from an already captured `codex exec --json` stream with a stable capture ID. See [exact usage semantics and commands](docs/runtime-observers.md); the office does not infer pricing or present these values as an invoice.
+
+### Renaissance theme and dashboard
+
+**Renaissance** is the default room theme: a palace hall with a checkered marble floor, stone and carved-wood walls, arched stained-glass windows, red banners, gilded rugs and warm candle light at night. Plum, Midnight, Amber and Juniper remain selectable, and saved settings that use them open unchanged. Furniture and the hall are painted in code (`web/js/hall.js`, `web/js/hall-props.js`); the only added asset is the open-license Cormorant Garamond heading font. Characters are unchanged.
+
+![Before: the earlier Plum studio](docs/screenshots/before-plum-desktop.png)
+![After: the Renaissance dashboard by day](docs/screenshots/renaissance-desktop-day.png)
+![The Renaissance hall by night](docs/screenshots/renaissance-desktop-night.png)
+
+The page is a mission-control dashboard. The header shows the office name (default **Hermes Mission Control**) and the local date and time. The sidebar opens the existing panels, and on narrow screens becomes a **Menu** button with the canvas first.
+
+| Panel | Shows |
+|---|---|
+| Agent Status | Each session with a pixel portrait, runtime, current tool and status. Status is a word and a glyph, never color alone. |
+| Active Environment | The current theme and a button to change it. |
+| System | CPU, RAM and disk from a read-only `GET /system`, on Linux only and from the standard library. Elsewhere the card is hidden; the first CPU reading is **Not reported**. |
+| Terminal & Tool Activity | The newest observed events, read only. |
+| Task Board | Task lists a runtime reported, filtered by status. **New Task** opens Draft prompt and Local runs. |
+| Subagent Network | Parent and child sessions as a graph or a list. |
+| Logs & Notifications | Notable events, with a link to the full log. |
+| Approval Control | Requests waiting for an answer. Answer them in the runtime that asked; there are no Approve or Reject buttons. |
+
+Panels show only what the server reports. Missing data reads **Not reported**, there are no progress percentages, and none of this creates activity, XP or usage. On wide screens the hall widens to fill the canvas.
+
+![The dashboard on a phone](docs/screenshots/renaissance-mobile.png) ![The phone menu](docs/screenshots/renaissance-mobile-menu.png)
 
 ### Earned room rewards
 
